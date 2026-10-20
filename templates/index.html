@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Predicción - Banco de Semillas ProHuerta</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h2 class="mb-3 text-success">🌱 Banco de Semillas ProHuerta - Predicción de Demanda</h2>
+        <p class="text-muted">Ingrese los datos del solicitante para predecir la cobertura del catálogo y generar las alertas de stock.</p>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card shadow-sm p-4">
+                    <form action="/" method="POST">
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label class="form-label">Año</label>
+                                <select name="anio" class="form-select" required>
+                                    <option value="2026" selected>2026</option>
+                                    <option value="2025">2025</option>
+                                    <option value="2024">2024</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Temporada</label>
+                                <select name="temporada" class="form-select" required>
+                                    <option value="PV" selected>Primavera-Verano (PV)</option>
+                                    <option value="OI">Otoño-Invierno (OI)</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Localización</label>
+                                <select name="tipo_localizacion" class="form-select" required>
+                                    <option value="urbana">Urbana</option>
+                                    <option value="periurbana">Periurbana</option>
+                                    <option value="rural">Rural</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Tipo de Huerta</label>
+                                <select name="tipo_huerta" class="form-select" required>
+                                    <option value="familiar">Familiar</option>
+                                    <option value="institucional">Institucional</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Experiencia</label>
+                                <select name="experiencia" class="form-select" required>
+                                    <option value="es la primera vez">Primera vez</option>
+                                    <option value="1 a 3 años">1 a 3 años</option>
+                                    <option value="más de 3 años">Más de 3 años</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Superficie</label>
+                                <select name="superficie" class="form-select" required>
+                                    <option value="hasta 5 m2">Hasta 5 m²</option>
+                                    <option value="entre 6 y 20 m2">Entre 6 y 20 m²</option>
+                                    <option value="más de 20 m2">Más de 20 m²</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Destino</label>
+                                <select name="destino" class="form-select" required>
+                                    <option value="autoconsumo">Autoconsumo</option>
+                                    <option value="autoconsumo e intercambio">Autoconsumo e Intercambio</option>
+                                    <option value="venta / excedentes">Venta / Comercial</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Ocupación</label>
+                                <select name="ocupacion" class="form-select" required>
+                                    <option value="empleado/a">Empleado/a</option>
+                                    <option value="jubilado/a">Jubilado/a</option>
+                                    <option value="cuentapropista / autónomo/a">Autónomo/a</option>
+                                    <option value="desempleado/a">Desempleado/a</option>
+                                    <option value="ama de casa / tareas del hogar">Ama de casa</option>
+                                    <option value="estudiante">Estudiante</option>
+                                    <option value="otro">Otro</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 mt-4">Predecir Demanda</button>
+                    </form>
+                </div>
+            </div>
+
+            {% if prediccion_num is not none %}
+            <div class="col-md-6">
+                <div class="card shadow-sm p-4">
+                    <h4 class="card-title text-primary">Resultados de la Predicción</h4>
+                    <hr>
+                    <p><strong>Cobertura Estimada del Catálogo:</strong> <span class="fs-4 text-dark">{{ prediccion_num }}%</span></p>
+                    <p class="text-muted small">(Oferta estimada de la temporada: {{ oferta_temporada }} variedades)</p>
+                    <hr>
+                    <h5>Comparación de Alertas (Umbral 75%):</h5>
+                    <ul class="list-group mb-3">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Regresión + Umbral
+                            {% if alerta_regresion == 1 %}
+                            <span class="badge bg-danger rounded-pill">1 - ALTA DEMANDA</span>
+                            {% else %}
+                            <span class="badge bg-secondary rounded-pill">0 - Demanda Estándar</span>
+                            {% endif %}
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Clasificador Directo
+                            {% if alerta_clasificador == 1 %}
+                            <span class="badge bg-danger rounded-pill">1 - ALTA DEMANDA</span>
+                            {% else %}
+                            <span class="badge bg-secondary rounded-pill">0 - Demanda Estándar</span>
+                            {% endif %}
+                        </li>
+                    </ul>
+
+                    {% if coinciden %}
+                    <div class="alert alert-success mt-2">
+                        ✅ <strong>Coincidencia:</strong> Ambos sistemas recomiendan la misma decisión logística.
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning mt-2">
+                        ⚠️ <strong>Discrepancia:</strong> Los modelos difieren. Caso cercano al umbral de decisión.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
