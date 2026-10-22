@@ -105,4 +105,4 @@ El modelo predice constantemente el valor promedio de `Cobertura_Catalogo` de en
 Para garantizar el cumplimiento de las especificaciones técnicas del curso:
 1. El archivo `app.py` **cargas los modelos previamente entrenados y guardados en la carpeta `modelos/`** (`modelo_regresion.joblib` y `modelo_clasificacion.joblib`).
 2. Se asegura un desacople total entre el pipeline de entrenamiento (`notebooks/entrenamiento.ipynb` / `entrenar_guardar_modelos.py`) y la inferencia web en tiempo real.
-3. Se proyecta incorporar en el backend el cálculo del **Modelo Financiero de Presupuesto** y el motor de **Recomendación Pluviométrica** para los desarrollos inmediatos. 
+3. Se proyecta incorporar en el backend el cálculo del **Modelo Financiero de Presupuesto** y el motor de **Recomendación Pluviométrica** para los desarrollos inmediatos.  
