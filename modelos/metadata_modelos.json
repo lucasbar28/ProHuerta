@@ -1,0 +1,114 @@
+{
+  "version": "modelos_v4_sobres_2024_2026_hist",
+  "fecha": "2026-10-24",
+  "fuente": "datos\\preparados\\solicitudes_v2.csv",
+  "filas_modeladas": 1487,
+  "unidad": "sobre equivalente = variedad solicitada",
+  "target_regresion": "especies_equivalentes",
+  "precio_fijo_sobre": 500,
+  "features": [
+    "anio_idx",
+    "temporada",
+    "tipo_huerta",
+    "tipo_localizacion",
+    "experiencia",
+    "superficie",
+    "destino",
+    "ocupacion",
+    "hist_barrio_mean",
+    "hist_barrio_count",
+    "hist_barrio_anios",
+    "ratio_barrio_vs_temp",
+    "ratio_perfil_vs_barrio"
+  ],
+  "variables_excluidas": [
+    "barrio_nombre",
+    "oferta_catalogo",
+    "cobertura_catalogo",
+    "alerta_alta_demanda",
+    "presupuesto_estimado",
+    "kits",
+    "anio"
+  ],
+  "particion": {
+    "train": 892,
+    "validacion": 297,
+    "test": 298,
+    "estratificacion": "temporada + anio + tercil_demanda",
+    "random_state": 42,
+    "proporcion": "60/20/20"
+  },
+  "target_estadisticas": {
+    "media": 7.739744451916611,
+    "mediana": 8.0,
+    "desvio": 3.7494083071011577,
+    "min": 0.0,
+    "max": 29.0
+  },
+  "regresion": {
+    "modelo": "KNeighborsRegressor",
+    "hiperparametros": {
+      "n_neighbors": 41,
+      "weights": "uniform"
+    },
+    "train": {
+      "rmse": 2.793323690058866,
+      "mae": 2.1186700207809253,
+      "r2": 0.44661342460805664
+    },
+    "validacion_cruda": {
+      "rmse": 3.542683757236995,
+      "mae": 2.6693766937669374,
+      "r2": 0.19570739502187817
+    },
+    "validacion_calibrada": {
+      "rmse": 3.4980853161237624,
+      "mae": 2.6519620745890955,
+      "r2": 0.21583022614156155
+    },
+    "test_crudo": {
+      "rmse": 3.3274868311812265,
+      "mae": 2.5737436568996563,
+      "r2": 0.09994795010066582
+    },
+    "test_calibrado": {
+      "rmse": 3.3925735029078146,
+      "mae": 2.6024347521431896,
+      "r2": 0.06439299202736071
+    },
+    "brecha_train_test_r2": 0.38222043258069593,
+    "cv5_rmse": 2.864921625000343,
+    "calibracion_por_temporada": {
+      "OI": 1.081538097331665,
+      "PV": 1.0744600891917624
+    },
+    "backtest_temporal": {
+      "filas_train": 1027,
+      "filas_test": 460,
+      "rmse": 5.296344350765148,
+      "mae": 4.0057264050901376,
+      "r2": -0.13063847587244637,
+      "rmse_naive": 5.499636231192745,
+      "mae_naive": 4.07294991744634
+    }
+  },
+  "baseline": {
+    "definicion": "media anual histórica por barrio y temporada, ajustada por crecimiento anual de la temporada",
+    "crecimiento_por_temporada": {
+      "OI": 0.05,
+      "PV": 0.05
+    },
+    "crecimiento_min": -0.05,
+    "crecimiento_max": 0.05,
+    "formula": "esperado(anio) = media_anual_sobres * (1 + crecimiento)^(anio - ultimo_anio)",
+    "solicitudes_esperadas": "solicitudes_del_ultimo_anio * (1 + crecimiento)^(anio - ultimo_anio)"
+  },
+  "alerta": {
+    "regla": "predicho > esperado * (1 + margen) y predicho - esperado >= diferencia_minima_sobres",
+    "margen": 0.1,
+    "diferencia_minima_sobres": 10.0,
+    "definicion": "sobredemanda esperada para años futuros por encima del crecimiento histórico"
+  },
+  "sklearn_version": "1.9.1",
+  "pandas_version": "3.0.6"
+}
