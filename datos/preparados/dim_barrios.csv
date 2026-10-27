@@ -1,0 +1,118 @@
+﻿barrio_norm,barrio_nombre,n_solicitudes,n_con_coordenadas,lat_centroide,lng_centroide,anios
+sin_dato,Sin dato,786,3,-35.543235549776796,-58.013721711642276,"2022, 2023, 2024, 2025, 2026"
+centro,Centro,181,114,-35.5751674709463,-58.011632514799985,"2022, 2023, 2025, 2026"
+hueco,El Hueco,176,102,-35.57035375317815,-58.000910621545955,"2022, 2023, 2025, 2026"
+san cayetano,San Cayetano,156,67,-35.53164869959953,-58.013853330688,"2022, 2023, 2025, 2026"
+noria chica,Noria Chica,144,71,-35.56479222447244,-58.00631012698398,"2022, 2023, 2025, 2026"
+ipora,Ipora,120,70,-35.56861356874997,-57.99395090805404,"2022, 2023, 2025, 2026"
+30 de mayo,30 de Mayo,86,35,-35.54988506678805,-58.01077975843674,"2022, 2023, 2025, 2026"
+fatima,Fátima,75,46,-35.57861399218376,-58.00384433399401,"2022, 2023, 2025, 2026"
+acceso norte,Acceso Norte,67,45,-35.55785998457048,-58.01364654232798,"2022, 2023, 2025, 2026"
+f moreno,F. Moreno,60,56,-35.57761467657217,-57.987413730143814,"2022, 2023, 2026"
+san luis,San Luis,58,26,-35.56327791857079,-58.02275512976178,"2022, 2023, 2025, 2026"
+escribano,Escribano,54,33,-35.56590049850798,-58.020477598148,"2022, 2023, 2025, 2026"
+algarrobo,El Algarrobo,52,33,-35.5607196060471,-58.00691030185201,"2022, 2023, 2025, 2026"
+jardin,Barrio Jardín,42,24,-35.56170583022411,-58.01413200990618,"2022, 2023, 2025, 2026"
+lomas altas,Lomas Altas,39,10,-35.58057416253007,-58.066677698148006,"2022, 2023, 2025, 2026"
+porteno,Porteño,36,15,-35.57461558830732,-57.971136628836,"2022, 2023, 2025, 2026"
+comi pini,Comi Pini,34,19,-35.5526429896828,-58.01402090261672,"2022, 2023, 2025, 2026"
+villa lujan,Villa Luján,33,15,-35.56520289776489,-58.0142736854201,"2022, 2023, 2025, 2026"
+obispado,El Obispado,32,24,-35.56081122523099,-58.01874230223408,"2022, 2023, 2025, 2026"
+esmeralda,La Esmeralda,32,11,-35.5592765824463,-57.9890465846569,"2022, 2023, 2025, 2026"
+esteban echeverria,Esteban Echeverría,31,23,-35.585696757193254,-57.986483536772006,"2022, 2023, 2025, 2026"
+san jose,San José,28,22,-35.570530006264875,-58.02035662209,"2022, 2023, 2025"
+gallo blanco,Gallo Blanco,25,2,-35.576088123690724,-57.98584472339739,"2022, 2023, 2025, 2026"
+concordia,Concordia,21,10,-35.56366055512306,-58.02811461931303,"2022, 2023, 2025, 2026"
+adela,Adela,20,0,,,"2022, 2025"
+giribone,Giribone,20,0,,,"2025, 2026"
+pampita,Pampita,20,13,-35.56695314649272,-57.98248337301463,"2022, 2023, 2025, 2026"
+parque girado,Parque Girado,18,14,-35.62539259086423,-58.01724584363497,"2022, 2023, 2026"
+sauces,Sauces,18,12,-35.553114397338874,-58.02072829363671,"2022, 2023, 2025, 2026"
+liberata,La Liberata,15,3,-35.609273238529084,-57.970587757671545,"2022, 2023, 2025, 2026"
+parque,Parque,15,5,-35.58660915449336,-57.979375574868,"2022, 2023, 2025, 2026"
+don cipriano,Don Cipriano,14,1,-35.54540759175658,-57.84181722883599,"2022, 2025, 2026"
+caballito blanco,Caballito Blanco,12,4,-35.57120804814211,-57.97611867791,"2022, 2023, 2025, 2026"
+libres del sur,Libres Del Sur,11,0,,,"2025, 2026"
+san juan bautista,San Juan Bautista,11,11,-35.580631768347764,-57.99625571534308,"2022, 2023"
+anahi,Anahí,10,5,-35.57302583218398,-57.98292135582115,"2022, 2023, 2025, 2026"
+coati,Coati,10,0,,,"2025, 2026"
+ruta 2,Ruta 2,9,0,,,"2025, 2026"
+san nicolas,San Nicolas,9,1,-35.526672733776735,-58.006865921434176,"2023, 2025, 2026"
+violetas,Violetas,9,3,-35.58148412204517,-57.994401913492,"2022, 2023, 2025, 2026"
+aromos,Aromos,7,2,-35.59084714541605,-57.986004842328,"2022, 2023, 2025"
+campo,Campo,6,0,,,"2023, 2026"
+gandara,Gandara,6,0,,,"2025, 2026"
+139 viviendas,139 Viviendas,5,0,,,"2025, 2026"
+parque chascomus,Parque Chascomús,5,5,-35.58833393983037,-57.979210357671995,2023
+recreo,Recreo,5,0,,,"2025, 2026"
+casuarinas,Casuarinas,4,0,,,"2025, 2026"
+eucaliptos,Eucaliptos,4,0,,,"2025, 2026"
+n,N,4,0,,,2026
+noria,Noria,4,0,,,"2025, 2026"
+san ceferino,San Ceferino,4,0,,,2025
+san gregorio,San Gregorio,4,0,,,"2025, 2026"
+villa del sur,Villa Del Sur,4,0,,,"2025, 2026"
+11,11,3,0,,,2026
+cooperativa,Cooperativa,3,0,,,"2025, 2026"
+granja,Granja,3,0,,,"2025, 2026"
+no sabe,No Sabe,3,0,,,"2025, 2026"
+san andres,San Andres,3,2,-35.57185965324997,-57.96494129325366,"2023, 2026"
+almacen 4 de febrero,Almacen 4 De Febrero,2,0,,,2025
+espartillar,Espartillar,2,0,,,2025
+ranqueles,Ranqueles,2,0,,,"2023, 2026"
+rural,Rural,2,0,,,2025
+solito,Solito,2,0,,,"2025, 2026"
+1111,1111,1,0,,,2026
+19 viviendas nuevo,19 Viviendas Nuevo,1,0,,,2026
+2022 05 30 00 00 00,2022 05 30 00 00 00,1,0,,,2022
+25 de mayo,25 De Mayo,1,0,,,2026
+85 viviendas,85 Viviendas,1,0,,,2025
+9 de julio,9 De Julio,1,0,,,2025
+aguila,Aguila,1,0,,,2026
+antes de lezama,Antes De Lezama,1,0,,,2025
+atras del cantryn,Atras Del Cantryn,1,0,,,2026
+atras del porteno,Atras Del Porteno,1,1,-35.570007079522156,-57.9531597846569,2023
+atras del tiro federal,Atras Del Tiro Federal,1,0,,,2025
+barrios antiguos,Barrios Antiguos,1,0,,,2026
+caba,Caba,1,0,,,2026
+camino a caidas,Camino A Caidas,1,1,-35.57745554585298,-58.06536241534399,2023
+camino de circunvalacion,Camino De Circunvalacion,1,1,-35.59903148744254,-57.97438047539601,2023
+camino mulas,Camino Mulas,1,0,,,2025
+cantring,Cantring,1,0,,,2025
+cerca de f moreno,Cerca De F Moreno,1,1,-35.576039486153476,-57.9838107,2022
+cerrillos,Cerrillos,1,0,,,2026
+chacra de pena,Chacra De Pena,1,0,,,2026
+chacras de pena,Chacras De Pena,1,0,,,2026
+country,Country,1,1,-35.54316571128321,-58.01388264417885,2023
+country club,Country Club,1,1,-35.54321576888467,-58.013747569311995,2022
+detras de laguna,Detras De Laguna,1,0,,,2026
+estancia,Estancia,1,1,-35.380678048165564,-57.80606501668458,2022
+florentino ameghino,Florentino Ameghino,1,0,,,2026
+general paz ranchos,General Paz Ranchos,1,0,,,2025
+loteo urtea,Loteo Urtea,1,0,,,2026
+magdalena,Magdalena,1,1,-35.08091289578305,-57.51831105767201,2023
+manantiales,Manantiales,1,1,-33.84923171210779,-60.31644722328,2023
+monasterio,Monasterio,1,1,-35.76368827251245,-57.9219712,2023
+no se encuentra,No Se Encuentra,1,0,,,2025
+nuevo,Nuevo,1,0,,,2026
+obtero,Obtero,1,0,,,2025
+otro,Otro,1,0,,,2025
+oy,Oy,1,0,,,2025
+paml,Paml,1,0,,,2026
+parque fente al cementerio,Parque Fente Al Cementerio,1,0,,,2026
+pasando porteno,Pasando Porteno,1,0,,,2025
+pava chica,Pava Chica,1,0,,,2025
+pava grande,Pava Grande,1,0,,,2026
+pinos,Pinos,1,1,-35.5469084828755,-58.015687771164,2023
+querencia,Querencia,1,0,,,2025
+rancho,Rancho,1,0,,,2026
+ruta,Ruta,1,0,,,2025
+ruta 11 kilometro 161 500,Ruta 11 Kilometro 161 500,1,0,,,2025
+ruta 2 km 123,Ruta 2 Km 123,1,0,,,2026
+ruta 20,Ruta 20,1,0,,,2026
+samborombon,Samborombon,1,0,,,2025
+tambien san miguel del monte,Tambien San Miguel Del Monte,1,0,,,2025
+tambor,Tambor,1,0,,,2025
+tapera,Tapera,1,0,,,2026
+ver,Ver,1,0,,,2026
+villa jardin,Villa Jardin,1,1,-35.564529065812714,-58.01580876637224,2022
