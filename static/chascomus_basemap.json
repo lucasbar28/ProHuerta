@@ -1,0 +1,13 @@
+{
+  "image": "/static/chascomus_basemap.jpg?v=6ed344ce88",
+  "bounds": [
+    -58.11767578125,
+    -35.63944106897394,
+    -57.89794921875,
+    -35.47856499535729
+  ],
+  "zoom": 14,
+  "attribution": "Esri, Maxar, Earthstar Geographics, © OpenStreetMap contributors",
+  "width": 2560,
+  "height": 2304
+}
