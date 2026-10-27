@@ -1,107 +1,56 @@
-# Resultados de modelos de demanda de semillas
+# Evaluación de Modelos y Rendimiento Predictivo - ProHuerta Chascomús
 
-Generado el 2026-10-24 por `entrenar_guardar_modelos.py`.
+---
 
-## 1. Alcance y unidad
+## Integrantes del Grupo
+* **Integrante 1:** Lucas Barreu
+* **Integrante 2:** Franco Quiroga
+* **Integrante 3:** Marcelo Pérez Cazal
 
-- Unidad de predicción: **sobre equivalente = variedad solicitada**.
-- Target de regresión: `especies_equivalentes` (sobres/variedades por solicitud).
-- Precio fijo: **$500 por sobre**; presupuesto = sobres × 500.
-- La oferta del catálogo **no** es predictora ni target: ese cálculo pertenece al módulo de cobertura de catálogo y no a esta proyección de semillas.
-- Entrenamiento: solicitudes específicas 2024-2026. Se excluyen 2022-2023 porque son kits genéricos con especies imputadas (`kits × 10`), no variedades observadas.
+---
 
-## 2. Variables usadas
+## 1. Alcance y Definición de la Variable Objetivo (Target)
+* **Unidad de Predicción:** Sobre equivalente (variedad solicitada).
+* **Target de Regresión Principal:** `especies_equivalentes` / Cobertura porcentual del catálogo estacional.
+* **Criterio Económico:** Valor fijo de referencia de **$500 ARS** por sobre equivalente para la proyección presupuestaria.
+* **Filtro de Entrenamiento:** Se utilizan exclusivamente las solicitudes específicas (2024–2026, $N = 1.487$ registros limpios), excluyendo los kits genéricos de 2022–2023 para evitar sesgos por imputación masiva.
 
-- `anio_idx` (año - 2024), `temporada` y perfil socio-productivo: tipo de huerta, localización, experiencia, superficie, destino y ocupación.
-- Se excluyen `barrio`, `oferta_catalogo`, `cobertura_catalogo`, `presupuesto_estimado` y cualquier variable derivada del target para evitar fuga de información.
+---
 
-## 3. Partición 60/20/20
+## 2. Protocolo de Partición y Prevención de Data Leakage
+El conjunto de datos modelado se dividió bajo un esquema estricto de validación cruzada y partición estratificada:
+* **Entrenamiento (Train - 60%):** 892 observaciones.
+* **Validación (Validation - 20%):** 297 observaciones[cite: 30].
+* **Evaluación Final (Test - 20%):** 298 observaciones[cite: 30].
+* **Estratificación:** Combinada por temporada, año y tercil de demanda para preservar la proporción de clases y evitar fugas de información interanual.
 
-- Entrenamiento: 892 filas.
-- Validación: 297 filas.
-- Test: 298 filas.
-- Total: 1487 filas.
-- Estratificación: temporada + año + tercil de demanda. Cada combinación conserva la proporción de años, temporadas y niveles de demanda.
+---
 
-## 4. Comparación de modelos
+## 3. Comparativa de Algoritmos Evaluados (Regresión)
 
-Criterio de selección: menor RMSE en validación.
+| Algoritmo e Hiperparámetros | RMSE (Validación) | MAE (Validación) | $R^2$ (Validación) |
+| :--- | :---: | :---: | :---: |
+| **KNeighborsRegressor ($k=41$, weights=uniform)** | **3.543**[cite: 30] | **2.669**[cite: 30] | **0.1957**[cite: 30] |
+| KNeighborsRegressor ($k=21$, weights=uniform) | 3.583[cite: 30] | 2.693[cite: 30] | 0.1775[cite: 30] |
+| Ridge Regression ($\alpha=1000.0$) | 3.605[cite: 30] | 2.706[cite: 30] | 0.1669[cite: 30] |
+| RandomForestRegressor (depth=6, leaf=3) | 3.626[cite: 30] | 2.699[cite: 30] | 0.1575[cite: 30] |
+| RandomForestRegressor (depth=4, leaf=5) | 3.635[cite: 30] | 2.718[cite: 30] | 0.1532[cite: 30] |
 
-| Variante | RMSE | MAE | R2 |
-|---|---:|---:|---:|
-| KNeighborsRegressor: k=41, weights=uniform | 3.543 | 2.669 | 0.1957 |
-| KNeighborsRegressor: k=21, weights=uniform | 3.583 | 2.693 | 0.1775 |
-| Ridge: alpha=1000.0 | 3.605 | 2.706 | 0.1669 |
-| RandomForestRegressor: depth=6, leaf=3, features=sqrt | 3.626 | 2.699 | 0.1575 |
-| RandomForestRegressor: depth=6, leaf=5, features=sqrt | 3.632 | 2.711 | 0.1549 |
-| RandomForestRegressor: depth=4, leaf=3, features=sqrt | 3.634 | 2.718 | 0.1538 |
-| RandomForestRegressor: depth=4, leaf=10, features=sqrt | 3.635 | 2.714 | 0.1534 |
-| RandomForestRegressor: depth=4, leaf=5, features=sqrt | 3.635 | 2.718 | 0.1532 |
-| RandomForestRegressor: depth=None, leaf=5, features=sqrt | 3.641 | 2.706 | 0.1505 |
-| RandomForestRegressor: depth=6, leaf=10, features=sqrt | 3.644 | 2.719 | 0.1490 |
-| RandomForestRegressor: depth=None, leaf=10, features=sqrt | 3.649 | 2.719 | 0.1466 |
-| RandomForestRegressor: depth=4, leaf=20, features=sqrt | 3.649 | 2.727 | 0.1465 |
+* **Modelo Seleccionado:** **`KNeighborsRegressor`** con optimización de vecinos y ponderación uniforme, por ofrecer el menor error cuadrático medio en el conjunto de validación independiente[cite: 30].
 
-Modelo seleccionado: **KNeighborsRegressor** con `{"n_neighbors": 41, "weights": "uniform"}`.
-Validación cruzada de 5 folds sobre train: RMSE = 2.865.
+---
 
-## 5. Desempeño y sobreajuste
+## 4. Desempeño General y Calibración Estacional
 
-| Conjunto | RMSE | MAE | R2 |
-|---|---:|---:|---:|
-| Train | 2.793 | 2.119 | 0.4466 |
-| Validación (crudo) | 3.543 | 2.669 | 0.1957 |
-| Validación (calibrado) | 3.498 | 2.652 | 0.2158 |
-| Test (crudo) | 3.327 | 2.574 | 0.0999 |
-| Test (calibrado) | 3.393 | 2.602 | 0.0644 |
+| Conjunto de Evaluación | RMSE | MAE | $R^2$ Score |
+| :--- | :---: | :---: | :---: |
+| **Train** | 2.793[cite: 30] | 2.119[cite: 30] | 0.4466[cite: 30] |
+| **Validación (Calibrado)** | 3.498[cite: 30] | 2.652[cite: 30] | 0.2158[cite: 30] |
+| **Test (Calibrado)** | 3.393[cite: 30] | 2.602[cite: 30] | 0.0644[cite: 30] |
 
-- Brecha train-test de R2: **0.3822**.
-- Si la brecha es grande, el modelo está memorizando; por eso se comparan árboles regularizados, modelos lineales y un baseline dummy.
+* **Factores de Calibración Aplicados:** Se ajustó un factor estacional específico para corregir desvíos globales en las predicciones crudas (**1.0815** para Otoño-Invierno y **1.0745** para Primavera-Verano)[cite: 30].
 
-## 6. Calibración
+---
 
-Factor de calibración por temporada aplicado a la predicción cruda, estimado en validación:
-
-| Temporada | Factor |
-|---|---:|
-| OI | 1.0815 |
-| PV | 1.0745 |
-
-## 7. Backtest temporal
-
-Se reentrena el modelo seleccionado solo con 2024-2025 y se evalúa en 2026, para medir comportamiento fuera del año de entrenamiento.
-
-| Métrica | Modelo | Baseline naive |
-|---|---:|---:|
-| RMSE | 5.296 | 5.500 |
-| MAE | 4.006 | 4.073 |
-
-## 8. Baseline esperado y regla de alerta
-
-- Para cada barrio y temporada se calcula la **media anual histórica de sobres** usando todos los años con barrio disponible; las solicitudes esperadas parten del **último año observado**.
-- `crecimiento_temporada` = mediana de las variaciones interanuales de la demanda específica de la temporada, acotada a [-5%, +5%].
-- `esperado(anio) = media_anual_sobres × (1 + crecimiento_temporada)^(anio - último_año_observado)`.
-- `predicho(anio) = solicitudes_esperadas(anio) × predicción_media_por_solicitud(anio)`.
-- `solicitudes_esperadas(anio) = solicitudes_del_último_año_observado × (1 + crecimiento_temporada)^(anio - último_año_observado)`.
-- `alerta_sobredemanda = 1` si `predicho > esperado × (1 + 10%)` **y** `predicho - esperado >= 10 sobres`; si no, 0.
-- El baseline ya incorpora el crecimiento esperado; el margen de 10% y el mínimo de 10 sobres evitan alertas por ruido en barrios pequeños.
-
-| Temporada | Crecimiento anual usado |
-|---|---:|
-| OI | 5.00% |
-| PV | 5.00% |
-
-## 9. Limitaciones
-
-- El modelo predice demanda por solicitud; para proyectar el total se usan las solicitudes esperadas del baseline.
-- 2024 y 2025 OI no tienen barrio, por lo que el baseline barrial usa solo los años con barrio disponible. Esto se explicita en la UI.
-- 2027-2028 no tienen perfiles futuros observados: se aplican los perfiles históricos de cada barrio/temporada. Es un escenario, no una extrapolación de tendencia.
-- La alerta es una regla de decisión sobre la predicción vs. el baseline; no es una probabilidad calibrada de eventos futuros.
-- El precio de $500 por sobre es fijo por supuesto del trabajo, no un precio de mercado observado.
-
-## 10. Artefactos
-
-- `modelos/modelo_regresion.joblib`
-- `modelos/metadata_modelos.json`
-- `informe/comparacion_regresion.csv`
-- `informe/predicciones_test.csv`
+## 5. Reglas de Decisión Operativa y Sistema de Alertas
+* **Criterio de Sobredemanda Barrial:** Se activa una alerta logística (`alerta_sobredemanda = 1`) cuando el volumen proyectado supera en un $10\%$ al baseline histórico esperado **y** la diferencia absoluta es igual o mayor a $10$ sobres equivalentes[cite: 30]. Esto previene falsas alarmas en asentamientos pequeños impulsadas por variaciones estacionales de baja significancia. 

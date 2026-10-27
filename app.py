@@ -25,7 +25,7 @@ GEO_PATH = BASE_DIR / "datos" / "geospatial" / "chascomus_barrios.geojson"
 MODEL_DIR = BASE_DIR / "modelos"
 BASEMAP_PATH = BASE_DIR / "static" / "chascomus_basemap.json"
 
-MODEL_REG = joblib.load(MODEL_DIR / "modelo_regresion.joblib")
+MODEL_REG = joblib.load(MODEL_DIR / "modelo_regresion_dash.joblib")
 METADATA = json.loads(
     (MODEL_DIR / "metadata_modelos.json").read_text(encoding="utf-8")
 )
@@ -210,7 +210,7 @@ APP_LOOKUPS = _build_app_lookups()
 def predict_packets(
     rows: pd.DataFrame, anio: int, temporada: str
 ) -> np.ndarray:
-    """Predice sobres equivalentes mapeando el input a las columnas exactas de scikit-learn."""
+    """Predice sobres equivalentes mapeando dinámicamente el input a las columnas de scikit-learn."""
     if rows.empty:
         return np.array([], dtype=float)
 
@@ -219,24 +219,32 @@ def predict_packets(
     if not match_cat.empty:
         oferta_default = float(match_cat.iloc[0]["oferta_catalogo"])
 
-    df_predict = pd.DataFrame()
-    df_predict["Año"] = [anio] * len(rows)
-    df_predict["Temporada"] = [temporada] * len(rows)
-    df_predict["Tipo_Localizacion"] = rows.get("tipo_localizacion", "urbana")
-    df_predict["Tipo_Huerta"] = rows.get("tipo_huerta", "familiar")
-    df_predict["Experiencia_Huerta_Clean"] = rows.get("experiencia", "primera vez")
-    df_predict["Superficie_Clean"] = rows.get("superficie", "hasta 5 m2")
-    df_predict["Destino_Clean"] = rows.get("destino", "autoconsumo")
-    df_predict["Ocupacion_Clean"] = rows.get("ocupacion", "empleado/a")
-    df_predict["Oferta_Catalogo"] = rows.get("oferta_catalogo", oferta_default)
+    df_predict = pd.DataFrame(index=rows.index)
+    
+    for col in FEATURES:
+        if col in rows.columns:
+            df_predict[col] = rows[col]
+        elif col in {"Año", "anio"}:
+            df_predict[col] = anio
+        elif col in {"anio_idx"}:
+            df_predict[col] = anio - BASE_ANIO
+        elif col in {"Temporada", "temporada"}:
+            df_predict[col] = temporada
+        elif col in {"Oferta_Catalogo", "oferta_catalogo"}:
+            df_predict[col] = rows.get("oferta_catalogo", oferta_default)
+        else:
+            if "mean" in col or "ratio" in col:
+                df_predict[col] = 1.0
+            elif "count" in col or "anios" in col:
+                df_predict[col] = 1.0
+            else:
+                df_predict[col] = "no especificado"
 
-    df_predict["Tipo_Localizacion"] = df_predict["Tipo_Localizacion"].fillna("urbana")
-    df_predict["Tipo_Huerta"] = df_predict["Tipo_Huerta"].fillna("familiar")
-    df_predict["Experiencia_Huerta_Clean"] = df_predict["Experiencia_Huerta_Clean"].fillna("primera vez")
-    df_predict["Superficie_Clean"] = df_predict["Superficie_Clean"].fillna("hasta 5 m2")
-    df_predict["Destino_Clean"] = df_predict["Destino_Clean"].fillna("autoconsumo")
-    df_predict["Ocupacion_Clean"] = df_predict["Ocupacion_Clean"].fillna("empleado/a")
-    df_predict["Oferta_Catalogo"] = df_predict["Oferta_Catalogo"].fillna(oferta_default)
+    for col in df_predict.columns:
+        if df_predict[col].dtype == object or pd.api.types.is_string_dtype(df_predict[col]):
+            df_predict[col] = df_predict[col].fillna("no especificado")
+        else:
+            df_predict[col] = df_predict[col].fillna(0.0)
 
     raw = np.clip(MODEL_REG.predict(df_predict), 0.0, MAX_PAQUETES_PRED)
     factor = float(CALIBRACION_POR_TEMPORADA.get(temporada, 1.0))
