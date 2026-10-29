@@ -1,0 +1,466 @@
+{#- Vista: Portada informativa del proyecto (primera pantalla). Ruta Flask: /
+    Página independiente: mismo tema que el sistema (Darkly + prohuerta.css) más portada.css; no incluye layouts/head.html.
+    El botón "Ingresar al sistema" lleva a nav_urls.home (/inicio). -#}
+{%- set urls = nav_urls|default({}) -%}
+{%- set url_sistema = urls.get('home', '/inicio') -%}
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ProHuerta Chascomús: proyecto académico de Ciencia de Datos e Inteligencia Artificial para estudiar la demanda de semillas y la planificación territorial del Banco de Semillas.">
+    <meta name="theme-color" content="#0a1120">
+
+    <title>ProHuerta Chascomús | Inteligencia de demanda y planificación territorial</title>
+
+    <!-- Mismo stack visual que el resto del sistema (layouts/head.html) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.0/dist/darkly/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Paleta compartida (variables) y luego estilos propios de la portada -->
+    <link href="{{ url_for('static', filename='css/prohuerta.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/portada.css') }}" rel="stylesheet">
+</head>
+
+<body>
+    <header class="navbar navbar-expand-lg navbar-dark navbar-prohuerta sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="#inicio" aria-label="ProHuerta Chascomús, inicio">
+                <span class="brand-icon">
+                    <i class="bi bi-flower1"></i>
+                </span>
+                <span>
+                    <strong>ProHuerta Chascomús</strong>
+                    <small class="d-block brand-subtitle">Ciencia de Datos e Inteligencia Artificial</small>
+                </span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuPrincipal" aria-controls="menuPrincipal" aria-expanded="false" aria-label="Abrir menú de navegación">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <nav class="collapse navbar-collapse" id="menuPrincipal">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-3">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#inicio">Portada</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#iniciativa">El proyecto</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#objetivos">Objetivos</a>
+                    </li>
+                    <li class="nav-item ms-lg-2">
+                        <a class="btn btn-primary-prohuerta btn-sm nav-cta" href="{{ url_sistema }}">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                            Ingresar al sistema
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero-section" id="inicio">
+            <div class="hero-overlay"></div>
+
+            <div class="container hero-content">
+                <span class="eyebrow">
+                    <i class="bi bi-geo-alt"></i>
+                    CHASCOMÚS · BUENOS AIRES
+                </span>
+
+                <h1>
+                    Los datos también pueden ayudar a
+                    <span>sembrar el futuro.</span>
+                </h1>
+
+                <p class="hero-description">
+                    Inteligencia de demanda y planificación territorial del Banco de Semillas.
+                    Un proyecto académico de Ciencia de Datos e Inteligencia Artificial
+                    al servicio del conocimiento local.
+                </p>
+
+                <div class="hero-actions">
+                    <a href="{{ url_sistema }}" class="btn btn-primary-prohuerta">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        Ingresar al sistema
+                    </a>
+
+                    <a href="#iniciativa" class="btn btn-outline-light">
+                        Conocer el proyecto
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+
+                    <a href="#objetivos" class="btn btn-outline-light">
+                        <i class="bi bi-compass"></i>
+                        Explorar los objetivos
+                    </a>
+                </div>
+            </div>
+
+            <div class="hero-bottom-label">
+                <i class="bi bi-bar-chart-line"></i>
+                Datos · Territorio · Comunidad
+            </div>
+        </section>
+
+        <!-- PRESENTACIÓN DEL PROYECTO EN CARRUSEL -->
+        <section class="project-showcase" id="iniciativa">
+            <div class="container">
+                <div class="showcase-heading">
+                    <span class="showcase-eyebrow">
+                        <i class="bi bi-flower1"></i>
+                        UNA IDEA QUE CRECE EN CHASCOMÚS
+                    </span>
+
+                    <h2>Conocé el proyecto</h2>
+
+                    <p>
+                        Comunidad, datos y tecnología para comprender mejor
+                        la demanda de semillas y explorar nuevas formas de planificación.
+                    </p>
+                </div>
+
+                <div id="projectCarousel" class="carousel slide" data-bs-ride="false">
+                    <div class="carousel-indicators">
+                        <button type="button" data-bs-target="#projectCarousel"
+                            data-bs-slide-to="0" class="active"
+                            aria-current="true" aria-label="La iniciativa"></button>
+                        <button type="button" data-bs-target="#projectCarousel"
+                            data-bs-slide-to="1" aria-label="Qué investigamos"></button>
+                        <button type="button" data-bs-target="#projectCarousel"
+                            data-bs-slide-to="2" aria-label="Qué desarrollamos"></button>
+                        <button type="button" data-bs-target="#projectCarousel"
+                            data-bs-slide-to="3" aria-label="Nuestro compromiso"></button>
+                    </div>
+
+                    <div class="carousel-inner">
+                        <div class="carousel-item active">
+                            <div class="showcase-slide slide-community">
+                                <div class="showcase-copy">
+                                    <span class="slide-number">01 / LA INICIATIVA</span>
+
+                                    <h3>Todo comienza en la comunidad.</h3>
+
+                                    <p>
+                                        El Banco Albergue de Intercambio de Semillas forma
+                                        parte de las iniciativas locales que promueven las
+                                        huertas familiares, el intercambio de semillas y
+                                        la producción agroecológica.
+                                    </p>
+
+                                    <p>
+                                        Nuestro proyecto académico toma esa realidad local
+                                        como punto de partida para explorar cómo los datos
+                                        pueden aportar conocimiento.
+                                    </p>
+
+                                    <div class="showcase-tags">
+                                        <span>Comunidad</span>
+                                        <span>Semillas</span>
+                                        <span>Chascomús</span>
+                                    </div>
+                                </div>
+
+                                <div class="showcase-art art-community">
+                                    <div class="art-circle circle-one"></div>
+                                    <div class="art-circle circle-two"></div>
+                                    <i class="bi bi-flower2 art-main-icon"></i>
+                                    <i class="bi bi-flower1 art-small-icon"></i>
+                                    <div class="art-caption">
+                                        <i class="bi bi-geo-alt-fill"></i>
+                                        <span>Raíces locales, futuro compartido</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item">
+                            <div class="showcase-slide slide-research">
+                                <div class="showcase-copy">
+                                    <span class="slide-number">02 / QUÉ INVESTIGAMOS</span>
+
+                                    <h3>Encontrar patrones entre los datos.</h3>
+
+                                    <p>
+                                        Estudiamos información histórica de solicitudes
+                                        y entregas para explorar variaciones entre años,
+                                        temporadas, variedades de semillas y barrios.
+                                    </p>
+
+                                    <p>
+                                        Buscamos reconocer relaciones y tendencias que
+                                        permitan formular mejores preguntas sobre la demanda.
+                                    </p>
+
+                                    <div class="showcase-tags">
+                                        <span>Análisis temporal</span>
+                                        <span>Demanda</span>
+                                        <span>Territorio</span>
+                                    </div>
+                                </div>
+
+                                <div class="showcase-art art-research">
+                                    <div class="floating-data data-top">
+                                        <i class="bi bi-calendar3"></i>
+                                        <span>Años y temporadas</span>
+                                    </div>
+
+                                    <div class="chart-illustration">
+                                        <div class="chart-grid"></div>
+                                        <div class="chart-bars">
+                                            <span style="--bar-height: 34%"></span>
+                                            <span style="--bar-height: 52%"></span>
+                                            <span style="--bar-height: 43%"></span>
+                                            <span style="--bar-height: 72%"></span>
+                                            <span style="--bar-height: 88%"></span>
+                                        </div>
+                                        <i class="bi bi-graph-up-arrow chart-arrow"></i>
+                                    </div>
+
+                                    <div class="floating-data data-bottom">
+                                        <i class="bi bi-geo-alt"></i>
+                                        <span>Patrones territoriales</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item">
+                            <div class="showcase-slide slide-tools">
+                                <div class="showcase-copy">
+                                    <span class="slide-number">03 / QUÉ DESARROLLAMOS</span>
+
+                                    <h3>Transformar información en herramientas visuales.</h3>
+
+                                    <p>
+                                        Aplicamos técnicas de análisis de datos y aprendizaje
+                                        automático (<em>machine learning</em>) para explorar
+                                        escenarios futuros y estimaciones orientativas de
+                                        necesidades y costos.
+                                    </p>
+
+                                    <p>
+                                        El proyecto integra mapas, gráficos e indicadores
+                                        para facilitar la interpretación de la información.
+                                    </p>
+
+                                    <div class="showcase-tags">
+                                        <span>Machine learning</span>
+                                        <span>Mapas</span>
+                                        <span>Escenarios</span>
+                                    </div>
+                                </div>
+
+                                <div class="showcase-art art-tools">
+                                    <div class="tool-window">
+                                        <div class="tool-window-header">
+                                            <span></span><span></span><span></span>
+                                            <small>Exploración de datos</small>
+                                        </div>
+
+                                        <div class="tool-window-body">
+                                            <div class="tool-stat">
+                                                <i class="bi bi-bar-chart-line"></i>
+                                                <span>Indicadores</span>
+                                            </div>
+
+                                            <div class="tool-map">
+                                                <i class="bi bi-geo-alt-fill map-pin pin-one"></i>
+                                                <i class="bi bi-geo-alt-fill map-pin pin-two"></i>
+                                                <i class="bi bi-geo-alt-fill map-pin pin-three"></i>
+                                                <i class="bi bi-geo-alt-fill map-pin pin-four"></i>
+                                                <div class="map-road road-one"></div>
+                                                <div class="map-road road-two"></div>
+                                            </div>
+
+                                            <div class="tool-footer">
+                                                <i class="bi bi-lightbulb"></i>
+                                                Información para explorar
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="carousel-item">
+                            <div class="showcase-slide slide-future">
+                                <div class="showcase-copy">
+                                    <span class="slide-number">04 / NUESTRO COMPROMISO</span>
+
+                                    <h3>Tecnología con los pies en la tierra.</h3>
+
+                                    <p>
+                                        Somos estudiantes de la Tecnicatura Superior en
+                                        Ciencia de Datos e Inteligencia Artificial del
+                                        Instituto Superior de Formación Docente y Técnica N.º 57.
+                                    </p>
+
+                                    <p>
+                                        Desarrollamos este trabajo con fines académicos,
+                                        procurando cuidar la información personal y comunicar
+                                        las limitaciones de cada estimación. Los resultados son
+                                        exploratorios, no decisiones oficiales ni certezas
+                                        sobre el futuro.
+                                    </p>
+
+                                    <div class="showcase-tags">
+                                        <span>Educación</span>
+                                        <span>Responsabilidad</span>
+                                        <span>Trabajo colaborativo</span>
+                                    </div>
+                                </div>
+
+                                <div class="showcase-art art-future">
+                                    <div class="future-sun"></div>
+                                    <i class="bi bi-tree-fill future-tree"></i>
+                                    <i class="bi bi-flower1 future-flower flower-left"></i>
+                                    <i class="bi bi-flower2 future-flower flower-right"></i>
+                                    <div class="future-ground"></div>
+
+                                    <div class="future-message">
+                                        <i class="bi bi-heart-fill"></i>
+                                        <span>Conocimiento que hace crecer la comunidad</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="carousel-control-prev" type="button"
+                        data-bs-target="#projectCarousel" data-bs-slide="prev"
+                        aria-label="Diapositiva anterior">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    </button>
+
+                    <button class="carousel-control-next" type="button"
+                        data-bs-target="#projectCarousel" data-bs-slide="next"
+                        aria-label="Diapositiva siguiente">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    </button>
+                </div>
+
+                <div class="showcase-bottom">
+                    <div class="showcase-institution">
+                        <i class="bi bi-mortarboard-fill"></i>
+                        <span>
+                            Proyecto académico colaborativo
+                            <small>Instituto Superior de Formación Docente y Técnica N.º 57</small>
+                        </span>
+                    </div>
+
+                    <a href="#objetivos" class="showcase-next-link">
+                        Conocer nuestros objetivos
+                        <i class="bi bi-arrow-down-circle"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="objectives-section" id="objetivos">
+            <div class="container">
+                <div class="section-heading text-center">
+                    <span class="section-eyebrow">¿QUÉ BUSCAMOS?</span>
+
+                    <h2>Información para tomar mejores decisiones</h2>
+
+                    <p>
+                        Cuatro ejes para explorar el potencial de los datos
+                        en la planificación territorial.
+                    </p>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <article class="objective-card h-100">
+                            <div class="objective-icon">
+                                <i class="bi bi-graph-up-arrow"></i>
+                            </div>
+                            <h3>Datos para decidir</h3>
+                            <p>
+                                Analizar la información disponible para reconocer patrones
+                                y acompañar la toma de decisiones.
+                            </p>
+                        </article>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <article class="objective-card h-100">
+                            <div class="objective-icon">
+                                <i class="bi bi-people"></i>
+                            </div>
+                            <h3>Fortalecimiento comunitario</h3>
+                            <p>
+                                Comprender mejor las necesidades del territorio
+                                y de las iniciativas comunitarias.
+                            </p>
+                        </article>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <article class="objective-card h-100">
+                            <div class="objective-icon">
+                                <i class="bi bi-recycle"></i>
+                            </div>
+                            <h3>Uso eficiente de recursos</h3>
+                            <p>
+                                Explorar información que permita planificar
+                                recursos de manera más organizada.
+                            </p>
+                        </article>
+                    </div>
+
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <article class="objective-card h-100">
+                            <div class="objective-icon">
+                                <i class="bi bi-map"></i>
+                            </div>
+                            <h3>Información territorial</h3>
+                            <p>
+                                Relacionar datos geográficos y temporales
+                                para comprender su distribución.
+                            </p>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="closing-section">
+            <div class="container">
+                <div class="closing-content">
+                    <i class="bi bi-flower2 closing-icon"></i>
+                    <p>
+                        Tecnología al servicio de una huerta más fuerte,
+                        más justa y más sostenible.
+                    </p>
+                </div>
+
+                <div class="closing-cta">
+                    <a href="{{ url_sistema }}" class="btn btn-primary-prohuerta btn-lg">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        Ingresar al sistema
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer-prohuerta">
+        <div class="container d-flex flex-column flex-md-row justify-content-between gap-2">
+            <span>
+                ProHuerta Chascomús · Proyecto académico de análisis de datos
+            </span>
+            <span>
+                Instituto N.º 57 · Chascomús, Buenos Aires, Argentina
+            </span>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

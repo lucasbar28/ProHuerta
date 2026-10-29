@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 from functools import lru_cache
 from pathlib import Path
 
@@ -896,17 +897,50 @@ def clean_number(value: object) -> float | int | None:
     return value
 
 
+# ── Navegación entre herramientas ────────────────────────────────────────
+# El navbar (templates/layouts/navbar.html) lee `nav_urls`. En desarrollo el control
+# de stock corre en otro puerto (app_inventario.py, 5001); en un despliegue de un
+# solo servicio se deja la ruta relativa. Se puede cambiar con INVENTARIO_URL.
+NAV_URLS = {
+    "portada": "/",
+    "home": "/inicio",
+    "mapa": "/mapa",
+    "informe": "/informe",
+    "inventario": os.environ.get("INVENTARIO_URL", "http://127.0.0.1:5001/"),
+}
+
+
+@app.context_processor
+def inject_nav():
+    return {"nav_urls": NAV_URLS}
+
+
 @app.route("/")
+def portada():
+    """Portada informativa del proyecto (primera pantalla)."""
+    return render_template("portada.html")
+
+
+@app.route("/inicio")
 def index():
+    """Inicio del sistema: herramientas y resumen del proyecto."""
+    return render_template("index.html")
+
+
+@app.route("/mapa")
+def mapa_demanda():
+    """Mapa 3D de demanda por barrio (datos vía /api/mapa_completo)."""
     return render_template(
-        "index.html",
-        periods=available_periods(),
-        barrios=map_barrios(),
-        threshold=0.0,
-        model_meta=METADATA,
+        "mapa_demanda.html",
         basemap=BASEMAP,
         max_observed_year=MAX_ANIO_OBSERVADO,
     )
+
+
+@app.route("/informe")
+def informe():
+    """Informe de datos y documentación técnica de los modelos."""
+    return render_template("informe.html", model_meta=METADATA)
 
 
 @app.route("/api/filtros")

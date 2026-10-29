@@ -1,0 +1,92 @@
+{#- Vista: Mapa de demanda por barrio (mapa 3D + detalle + comparativa + tendencia).
+   Ruta Flask: /mapa  (ver INTEGRACION.md).  Datos: /api/mapa_completo, /api/filtros, /api/health.
+   Variables de contexto usadas (opcionales): basemap, max_observed_year -#}
+{% set page_title = 'Mapa de demanda' %}
+{% set active_page = 'mapa' %}
+{% set show_period = true %}
+{% from 'layouts/filtros.html' import filtros %}
+{% include 'layouts/head.html' %}
+<body class="page-mapa">
+{% include 'layouts/navbar.html' %}
+
+<main class="page">
+  <div class="grid-map">
+
+    <aside class="col-filters">
+      {{ filtros() }}
+
+      <section class="panel" aria-live="polite">
+        <h3 class="panel-title"><i class="bi bi-bar-chart-fill"></i> Resumen general</h3>
+        <div class="kpi-label">Demanda total proyectada</div>
+        <div class="kpi-value" id="kpi-total">—</div>
+        <div class="kpi-row" style="margin-top:4px">
+          <span class="delta flat" id="kpi-delta">—</span>
+          <span class="kpi-small" id="kpi-delta-note"></span>
+        </div>
+        <div style="margin-top:10px"><span class="chip gray" id="kpi-alertas">—</span></div>
+        <div class="kpi-small" style="margin-top:10px" id="kpi-nota"></div>
+      </section>
+
+      <section class="panel">
+        <h3 class="panel-title"><i class="bi bi-exclamation-triangle-fill"></i> Prioridades a reforzar</h3>
+        <ul class="mini-list" id="prioridades"><li class="kpi-small">Cargando…</li></ul>
+      </section>
+    </aside>
+
+    <section class="panel col-map map-card" aria-label="Mapa 3D de demanda por barrio">
+      <div id="map" role="img" aria-label="Mapa 3D de Chascomús con barras de demanda histórica y proyectada por barrio"></div>
+      <div class="map-overlay top-left">
+        <div class="t">Mapa de demanda · Chascomús</div>
+        <div class="s">Referencia vs. proyección · polígonos por barrio</div>
+      </div>
+      <div class="map-controls">
+        <button type="button" id="zoom-in" aria-label="Acercar">+</button>
+        <button type="button" id="zoom-out" aria-label="Alejar">−</button>
+        <button type="button" id="zoom-reset" aria-label="Restablecer vista" title="Restablecer vista"><i class="bi bi-compass"></i></button>
+      </div>
+      <div class="map-overlay map-legend">
+        <span><i style="background:#9aa9c2"></i>Referencia / observado</span>
+        <span><i style="background:#2f8cff"></i>Proyección a la baja</span>
+        <span><i style="background:#3ddc84"></i>Estable</span>
+        <span><i style="background:#ffb020"></i>Sube</span>
+        <span><i style="background:#ff4d4f"></i>Alerta de sobredemanda</span>
+      </div>
+      <div class="map-note" id="map-attrib">Imágenes: Esri, Maxar, Earthstar Geographics · © OpenStreetMap</div>
+      <div class="map-loading" id="map-loading">Cargando mapa…</div>
+    </section>
+
+    <aside class="panel col-detail detail" id="detalle" aria-live="polite">
+      <div class="empty">Seleccioná un barrio en el mapa.</div>
+    </aside>
+
+    <div class="row-bottom">
+      <section class="panel">
+        <h3 class="panel-title"><i class="bi bi-bar-chart-line-fill"></i> Comparativa por barrio
+          <span class="hint" id="bar-hint">Referencia vs. proyección</span></h3>
+        <div class="chart-box"><canvas id="chart-barras" aria-label="Comparativa por barrio" role="img"></canvas></div>
+      </section>
+      <section class="panel">
+        <h3 class="panel-title"><i class="bi bi-graph-up-arrow"></i> Tendencias y análisis
+          <span class="hint">Total de barrios mapeados</span></h3>
+        <div class="row g-3 align-items-center">
+          <div class="col-lg-7"><div class="chart-box"><canvas id="chart-tendencia" aria-label="Tendencia de la demanda total" role="img"></canvas></div></div>
+          <div class="col-lg-5"><ul class="insights" id="insights"></ul></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  {% include 'layouts/footer.html' %}
+</main>
+
+<script>
+  /* Datos que entrega Flask a la vista (si faltan, el JS usa valores por defecto) */
+  window.PH_BASEMAP = {{ (basemap if basemap is defined else none)|tojson }};
+  window.PH_MAX_OBS = {{ (max_observed_year if max_observed_year is defined else 2026)|tojson }};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/deck.gl@8.9.35/dist.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script src="{{ url_for('static', filename='js/mapa.js') }}"></script>
+</body>
+</html>

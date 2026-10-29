@@ -1,0 +1,35 @@
+{#- layouts/filtros.html · panel de filtros del mapa (macro).
+   Uso:  {% from 'layouts/filtros.html' import filtros %}  {{ filtros() }}
+   Los ids (f-temporada, f-anio, f-variable, f-barrio, f-apply) los usa static/js/common.js -#}
+{% macro filtros(barrio=True, boton='Aplicar filtros') %}
+<section class="panel" aria-label="Filtros">
+  <h3 class="panel-title"><i class="bi bi-funnel-fill"></i> Filtros</h3>
+  <div class="field">
+    <label for="f-temporada">Temporada</label>
+    <select class="select" id="f-temporada">
+      <option value="PV">Primavera – Verano</option>
+      <option value="OI">Otoño – Invierno</option>
+    </select>
+  </div>
+  <div class="field">
+    <label for="f-anio">Año proyectado</label>
+    <select class="select" id="f-anio"></select>
+    <div class="kpi-small" id="f-anio-hint" style="margin-top:5px"></div>
+  </div>
+  <div class="field">
+    <label for="f-variable">Variable de análisis</label>
+    <select class="select" id="f-variable">
+      <option value="paquetes">Sobres equivalentes</option>
+      <option value="solicitudes">Solicitudes</option>
+      <option value="presupuesto">Presupuesto ($)</option>
+    </select>
+  </div>
+  {% if barrio %}
+  <div class="field">
+    <label for="f-barrio">Barrio</label>
+    <select class="select" id="f-barrio"><option value="">Automático (el más relevante)</option></select>
+  </div>
+  {% endif %}
+  <button class="ph-btn" type="button" id="f-apply"><i class="bi bi-arrow-repeat"></i> {{ boton }}</button>
+</section>
+{% endmacro %}

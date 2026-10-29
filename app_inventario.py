@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 from pathlib import Path
 import joblib
 import pandas as pd
@@ -15,6 +16,23 @@ modelo_regresion = joblib.load(MODEL_REG_PATH)
 modelo_clasificacion = joblib.load(MODEL_CLS_PATH)
 
 app = Flask(__name__)
+
+# Navbar compartido (templates/layouts/navbar.html): enlaces al resto de las herramientas,
+# que corren en app.py (puerto 5000). Se puede cambiar con MAPA_BASE_URL.
+_MAPA = os.environ.get("MAPA_BASE_URL", "http://127.0.0.1:5000").rstrip("/")
+NAV_URLS = {
+    "portada": _MAPA + "/",
+    "home": _MAPA + "/inicio",
+    "mapa": _MAPA + "/mapa",
+    "informe": _MAPA + "/informe",
+    "inventario": "/",
+}
+
+
+@app.context_processor
+def inject_nav():
+    return {"nav_urls": NAV_URLS}
+
 
 # Oferta oficial del catálogo por temporada/año
 OFERTA_CATALOGO = {
@@ -69,7 +87,7 @@ def index():
         except Exception as e:
             return jsonify({"error": str(e)}), 400
             
-    return render_template('index.html', **contexto)
+    return render_template('inventario.html', **contexto)
 
 if __name__ == '__main__':
     # Ejecutamos en un puerto distinto para que puedas correr ambos simultáneamente

@@ -1,0 +1,57 @@
+{#- ─────────────────────────────────────────────────────────────────────────
+   layouts/navbar.html · Navbar ÚNICO de ProHuerta.
+   Variables que puede definir la vista antes del include:
+     active_page : 'portada' | 'home' | 'mapa' | 'inventario' | 'informe'  (resalta el enlace)
+     show_period : true  → muestra el período seleccionado (solo en el mapa)
+   Variable global (context processor de Flask, opcional):
+     nav_urls    : {'portada','home','mapa','inventario','informe'} → URLs absolutas cuando
+                   las herramientas corren en puertos distintos (5000 y 5001).
+                   Si no existe, se usan rutas relativas del mismo servidor.
+   Para agregar una herramienta nueva basta con sumar una línea a `links`.
+   ───────────────────────────────────────────────────────────────────────── -#}
+{% set urls = nav_urls|default({}) %}
+{% set links = [
+  ('portada',    urls.get('portada', '/'),                'Presentación',     'bi-easel2-fill'),
+  ('home',       urls.get('home', '/inicio'),             'Inicio',           'bi-house-door-fill'),
+  ('mapa',       urls.get('mapa', '/mapa'),               'Mapa de demanda',  'bi-map-fill'),
+  ('inventario', urls.get('inventario', '/inventario'),   'Control de stock', 'bi-box-seam-fill'),
+  ('informe',    urls.get('informe', '/informe'),         'Informe de datos', 'bi-file-earmark-bar-graph-fill'),
+] %}
+<header class="topbar">
+  <a class="brand" href="{{ urls.get('home', '/inicio') }}" aria-label="ProHuerta · inicio">
+    <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
+      <defs><linearGradient id="phLeaf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#43d17a"/><stop offset="1" stop-color="#1f8f4e"/></linearGradient></defs>
+      <path d="M24 5c-9 5-14 12-14 20 0 8 6 14 14 14s14-6 14-14C38 17 33 10 24 5z" fill="url(#phLeaf)"/>
+      <path d="M24 12v26M24 22l-7-5M24 28l8-6" stroke="#0a1120" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+    </svg>
+    <div>
+      <div class="brand-name">Chascomús</div>
+      <div class="brand-sub">Pronóstico de demanda de semillas por barrio</div>
+    </div>
+  </a>
+
+  {% if show_period|default(false) %}
+  <div class="topbar-sep"></div>
+  <div class="period-pill" title="Período seleccionado">
+    <i class="bi bi-calendar3"></i>
+    <div>
+      <span class="pp-season" id="pp-season">—</span>
+      <span class="pp-year" id="pp-year">—</span>
+    </div>
+  </div>
+  {% endif %}
+
+  <button class="nav-toggle" type="button" aria-label="Abrir menú" id="nav-toggle"><i class="bi bi-list"></i></button>
+
+  <nav class="ph-nav" id="nav" aria-label="Herramientas">
+    {% for key, href, label, ico in links %}
+    <a href="{{ href }}" data-nav="{{ key }}" class="{{ 'active' if active_page|default('') == key else '' }}"
+       {% if active_page|default('') == key %}aria-current="page"{% endif %}><i class="bi {{ ico }}"></i><span>{{ label }}</span></a>
+    {% endfor %}
+  </nav>
+
+  <div class="municipio">
+    <div class="m-mark">CH</div>
+    <div><span class="m-kicker">Municipalidad de</span><span class="m-name">Chascomús</span></div>
+  </div>
+</header>
