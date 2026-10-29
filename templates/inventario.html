@@ -1,0 +1,169 @@
+{#- Vista: Control de stock / simulación de cobertura por solicitud.
+   Ruta Flask: /inventario (o "/" en app_inventario.py).  Se envía por POST a la misma URL.
+   Contexto esperado (lo entrega app_inventario.py): prediccion_num, alerta_regresion,
+   alerta_clasificador, coinciden, oferta_temporada  (None antes de calcular). -#}
+{% set page_title = 'Control de stock' %}
+{% set active_page = 'inventario' %}
+{% include 'layouts/head.html' %}
+{% set F = request.form if request.method == 'POST' else {} %}
+{% macro opt(name, value, label, default=False) -%}
+  <option value="{{ value }}" {{ 'selected' if (F.get(name) == value or (not F.get(name) and default)) else '' }}>{{ label }}</option>
+{%- endmacro %}
+<body class="page-inventario">
+{% include 'layouts/navbar.html' %}
+
+<main class="page">
+  <div class="grid-2">
+
+    <aside>
+      <form class="panel" method="POST" action="" id="form-stock" novalidate>
+        <h3 class="panel-title"><i class="bi bi-sliders"></i> Datos de la solicitud</h3>
+
+        <div>
+          <div class="field">
+            <label for="temporada">Temporada</label>
+            <select class="select" name="temporada" id="temporada" required>
+              {{ opt('temporada', 'PV', 'Primavera–Verano (PV)', True) }}
+              {{ opt('temporada', 'OI', 'Otoño–Invierno (OI)') }}
+            </select>
+          </div>
+          <div class="field">
+            <label for="anio">Año</label>
+            <select class="select" name="anio" id="anio" required data-selected="{{ F.get('anio', '2026') }}"></select>
+          </div>
+        </div>
+        <div class="kpi-small" style="margin:-6px 0 12px">Solo se ofrecen combinaciones año/temporada con catálogo oficial.</div>
+
+        <div class="field">
+          <label for="tipo_localizacion">Localización</label>
+          <select class="select" name="tipo_localizacion" id="tipo_localizacion" required>
+            {{ opt('tipo_localizacion', 'urbana', 'Urbana', True) }}
+            {{ opt('tipo_localizacion', 'periurbana', 'Periurbana') }}
+            {{ opt('tipo_localizacion', 'rural', 'Rural') }}
+          </select>
+        </div>
+        <div class="field">
+          <label for="tipo_huerta">Tipo de huerta</label>
+          <select class="select" name="tipo_huerta" id="tipo_huerta" required>
+            {{ opt('tipo_huerta', 'familiar', 'Familiar', True) }}
+            {{ opt('tipo_huerta', 'institucional', 'Institucional') }}
+          </select>
+        </div>
+        <div class="field">
+          <label for="experiencia">Experiencia</label>
+          <select class="select" name="experiencia" id="experiencia" required>
+            {{ opt('experiencia', 'primera vez', 'Primera vez', True) }}
+            {{ opt('experiencia', '1 a 3 años', '1 a 3 años') }}
+            {{ opt('experiencia', 'más de 3 años', 'Más de 3 años') }}
+          </select>
+        </div>
+        <div class="field">
+          <label for="superficie">Superficie</label>
+          <select class="select" name="superficie" id="superficie" required>
+            {{ opt('superficie', 'hasta 5 m2', 'Hasta 5 m²', True) }}
+            {{ opt('superficie', 'entre 6 y 20 m2', 'Entre 6 y 20 m²') }}
+            {{ opt('superficie', 'más de 20 m2', 'Más de 20 m²') }}
+          </select>
+        </div>
+        <div class="field">
+          <label for="destino">Destino de la producción</label>
+          <select class="select" name="destino" id="destino" required>
+            {{ opt('destino', 'autoconsumo', 'Autoconsumo', True) }}
+            {{ opt('destino', 'autoconsumo e intercambio', 'Autoconsumo e intercambio') }}
+            {{ opt('destino', 'venta / excedentes', 'Venta / comercial') }}
+          </select>
+        </div>
+        <div class="field">
+          <label for="ocupacion">Ocupación</label>
+          <select class="select" name="ocupacion" id="ocupacion" required>
+            {{ opt('ocupacion', 'empleado/a', 'Empleado/a', True) }}
+            {{ opt('ocupacion', 'jubilado/a', 'Jubilado/a') }}
+            {{ opt('ocupacion', 'cuentapropista / autónomo/a', 'Autónomo/a') }}
+            {{ opt('ocupacion', 'ama de casa / tareas del hogar', 'Ama de casa') }}
+            {{ opt('ocupacion', 'estudiante', 'Estudiante') }}
+            {{ opt('ocupacion', 'otro', 'Otro') }}
+          </select>
+        </div>
+
+        <button class="ph-btn green" type="submit"><i class="bi bi-stars"></i> Analizar escenario</button>
+      </form>
+    </aside>
+
+    <section class="stack" aria-live="polite">
+      <div class="panel">
+        <h3 class="panel-title"><i class="bi bi-graph-up"></i> Resultados del modelo</h3>
+
+        {% if prediccion_num is defined and prediccion_num is not none %}
+          {% set oferta = oferta_temporada|default(none) %}
+          <div class="kpi-label">Cobertura estimada del catálogo</div>
+          <div class="kpi-row">
+            <span class="result-big">{{ prediccion_num|string|replace('.', ',') }}%</span>
+            {% if oferta %}<span class="kpi-small">≈ {{ ((prediccion_num / 100 * oferta)|round(0))|int }} de {{ oferta }} variedades de la temporada</span>{% endif %}
+          </div>
+          <div class="progress" style="height:10px;background:rgba(255,255,255,.08);margin:10px 0 18px" role="progressbar"
+               aria-valuenow="{{ prediccion_num }}" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-bar" style="width:{{ prediccion_num }}%;background:linear-gradient(90deg,#2f8cff,{{ '#ff4d4f' if prediccion_num >= 75 else '#3ddc84' }})"></div>
+          </div>
+
+          <div class="cards-2">
+            <div class="kpi-card">
+              <div class="kpi-label">Regresión + umbral (≥ 75 %)</div>
+              {% if alerta_regresion == 1 %}<span class="chip red"><i class="bi bi-exclamation-triangle-fill"></i> 1 · Alta demanda</span>
+              {% else %}<span class="chip gray">0 · Demanda estándar</span>{% endif %}
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Clasificador directo</div>
+              {% if alerta_clasificador == 1 %}<span class="chip red"><i class="bi bi-exclamation-triangle-fill"></i> 1 · Alta demanda</span>
+              {% else %}<span class="chip gray">0 · Demanda estándar</span>{% endif %}
+            </div>
+          </div>
+
+          {% if coinciden %}
+          <div class="callout info" style="margin-top:14px"><b><i class="bi bi-check-circle-fill"></i> Coincidencia.</b> Ambos sistemas recomiendan la misma decisión logística.</div>
+          {% else %}
+          <div class="callout warn" style="margin-top:14px"><b><i class="bi bi-exclamation-triangle-fill"></i> Discrepancia.</b>
+            Los sistemas difieren. Suele ocurrir en casos cercanos al umbral del 75 %; ante la duda conviene preparar el kit completo
+            (un falso negativo cuesta el doble que un falso positivo).</div>
+          {% endif %}
+        {% else %}
+          <div class="empty">
+            <i class="bi bi-info-circle" style="font-size:2rem;display:block;margin-bottom:8px"></i>
+            Completá los datos de la solicitud y presioná <b>«Analizar escenario»</b> para estimar la cobertura del catálogo.
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="panel prose">
+        <h2 style="font-size:1.05rem">¿Cómo se interpreta?</h2>
+        <ul>
+          <li><b>Cobertura</b>: porcentaje de las variedades del catálogo de la temporada que pediría una solicitud con este perfil.</li>
+          <li><b>Alerta de alta demanda</b>: la cobertura llega al 75 % o más (al menos 3 de cada 4 variedades). Indica que conviene armar el kit completo por adelantado.</li>
+          <li><b>Dos sistemas</b>: el primero predice el porcentaje y aplica el umbral; el segundo predice directamente la alerta. Se muestran ambos para detectar casos dudosos.</li>
+          <li><b>Costos</b>: falso positivo = 1 (kit armado de más); falso negativo = 2 (faltan variedades en el mostrador).</li>
+        </ul>
+        <div class="callout warn"><b><i class="bi bi-exclamation-triangle-fill"></i> Limitaciones.</b>
+          Es una estimación por perfil, entrenada con solicitudes 2024–2026 y la oferta de catálogo de cada temporada. No contempla
+          cambios de catálogo futuros ni situaciones excepcionales, y no debe usarse como único criterio para asignar insumos a una familia.</div>
+      </div>
+    </section>
+  </div>
+
+  {% include 'layouts/footer.html' %}
+</main>
+
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script>
+  /* Solo ofrece combinaciones año/temporada con catálogo oficial (evita la "oferta por defecto" del backend). */
+  (function () {
+    var VALID = { PV: [2024, 2025, 2026], OI: [2025, 2026] };
+    var t = document.getElementById('temporada'), a = document.getElementById('anio');
+    function fill() {
+      var keep = parseInt(a.value || a.getAttribute('data-selected'), 10), ys = VALID[t.value] || [];
+      a.innerHTML = ys.map(function (y) { return '<option value="' + y + '">' + y + '</option>'; }).join('');
+      a.value = ys.indexOf(keep) >= 0 ? keep : ys[ys.length - 1];
+    }
+    t.addEventListener('change', fill); fill();
+  })();
+</script>
+</body>
+</html>

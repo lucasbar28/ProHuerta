@@ -1,0 +1,147 @@
+{#- Vista: Informe de datos y documentación técnica.  Ruta Flask: /informe
+   Contexto esperado: model_meta (el JSON de modelos/metadata_modelos.json).
+   Si no llega, la vista muestra igualmente la parte descriptiva. -#}
+{% set page_title = 'Informe de datos' %}
+{% set active_page = 'informe' %}
+{% include 'layouts/head.html' %}
+{% set M = model_meta|default({}) %}
+{% set R = M.get('regresion', {}) %}
+{% set P = M.get('particion', {}) %}
+{% set A = M.get('alerta', {}) %}
+{% macro n(x, d=2) -%}{%- if x is number -%}{{ ('%.' ~ d ~ 'f')|format(x)|replace('.', ',') }}{%- else -%}—{%- endif -%}{%- endmacro %}
+<body class="page-informe">
+{% include 'layouts/navbar.html' %}
+
+<main class="page">
+  <div class="doc-layout">
+
+    <nav class="doc-toc panel" aria-label="Contenido">
+      <div class="kpi-label" style="margin-bottom:8px">En esta página</div>
+      <a href="#datos">1 · Datos</a>
+      <a href="#variables">2 · Variables</a>
+      <a href="#modelo">3 · Modelo de demanda</a>
+      <a href="#metricas">4 · Métricas</a>
+      <a href="#alerta">5 · Regla de alerta</a>
+      <a href="#stock">6 · Módulo de stock</a>
+      <a href="#limites">7 · Limitaciones</a>
+    </nav>
+
+    <article class="stack">
+
+      <section class="panel prose" id="datos">
+        <h2>1 · Datos utilizados</h2>
+        <p>La fuente son los formularios de retiro de semillas del ProHuerta / Banco de Semillas de Chascomús (temporadas 2022 a 2026).
+           Cada fila es una <b>solicitud</b> de un responsable de huerta (familiar o institucional).</p>
+        <div class="kpi-grid">
+          <div class="kpi-card"><div class="kpi-label">Solicitudes registradas</div><div class="kpi-value">2.730</div></div>
+          <div class="kpi-card"><div class="kpi-label">Kits genéricos 2022–2023</div><div class="kpi-value">1.238</div><div class="kpi-small">excluidos del modelado</div></div>
+          <div class="kpi-card"><div class="kpi-label">Solicitudes específicas 2024–2026</div><div class="kpi-value">1.492</div></div>
+          <div class="kpi-card"><div class="kpi-label">Solicitudes modeladas</div><div class="kpi-value">{{ '{:,}'.format(M.get('filas_modeladas', 1487))|replace(',', '.') }}</div><div class="kpi-small">con especies observadas</div></div>
+        </div>
+        <p style="margin-top:14px">En 2022–2023 se entregaba un kit genérico sin detalle de variedades. Esas especies solo podrían <i>imputarse</i>,
+           por eso <b>no se usan para entrenar</b>: el modelo aprende únicamente de solicitudes con variedades realmente observadas.</p>
+        {% if P %}
+        <h2>Partición de los datos</h2>
+        <p>Partición estratificada ({{ P.get('estratificacion', 'temporada + año + tercil de demanda') }}), semilla {{ P.get('random_state', 42) }}:
+           entrenamiento <b>{{ P.get('train') }}</b>, validación <b>{{ P.get('validacion') }}</b>, prueba <b>{{ P.get('test') }}</b> ({{ P.get('proporcion', '60/20/20') }}).
+           El conjunto de prueba se reserva para la evaluación final.</p>
+        {% endif %}
+      </section>
+
+      <section class="panel prose" id="variables">
+        <h2>2 · Variables</h2>
+        <p><b>Objetivo (regresión):</b> <code>{{ M.get('target_regresion', 'especies_equivalentes') }}</code> — sobres (variedades) que pide cada solicitud.
+           Valor de referencia: ${{ M.get('precio_fijo_sobre', 500)|int }} por sobre para el presupuesto.</p>
+        {% if M.get('features') %}
+        <p><b>Predictores usados:</b> {% for f in M.features %}<code>{{ f }}</code>{{ ', ' if not loop.last }}{% endfor %}.</p>
+        {% endif %}
+        {% if M.get('variables_excluidas') %}
+        <p><b>Excluidas para evitar fuga de información:</b> {% for f in M.variables_excluidas %}<code>{{ f }}</code>{{ ', ' if not loop.last }}{% endfor %}.</p>
+        {% endif %}
+        <p class="kpi-small">Diccionario completo y reglas de limpieza: <code>informe/diccionario_datos.md</code> y <code>informe/auditoria_datos.md</code> en el repositorio.</p>
+      </section>
+
+      <section class="panel prose" id="modelo">
+        <h2>3 · Modelo de demanda</h2>
+        <dl class="kv">
+          <dt>Versión</dt><dd>{{ M.get('version', '—') }}</dd>
+          <dt>Algoritmo</dt><dd>{{ R.get('modelo', '—') }}</dd>
+          <dt>Hiperparámetros</dt><dd>{% for k, v in R.get('hiperparametros', {}).items() %}<code>{{ k }}={{ v }}</code> {% else %}—{% endfor %}</dd>
+          <dt>Calibración</dt><dd>{% for k, v in R.get('calibracion_por_temporada', {}).items() %}<code>{{ k }} ×{{ n(v, 3) }}</code> {% else %}—{% endfor %}</dd>
+          <dt>Entrenado</dt><dd>{{ M.get('fecha', '—') }} · scikit-learn {{ M.get('sklearn_version', '—') }}</dd>
+        </dl>
+        <p style="margin-top:12px">El modelo estima cuántos sobres pedirá <i>una solicitud</i> según su perfil. Para llegar a un barrio, se multiplica por las
+           solicitudes esperadas y se compara con un <b>baseline</b> histórico del barrio.</p>
+      </section>
+
+      <section class="panel prose" id="metricas">
+        <h2>4 · Métricas de evaluación</h2>
+        {% if R %}
+        <div class="table-wrap">
+          <table class="data">
+            <thead><tr><th>Conjunto</th><th>RMSE</th><th>MAE</th><th>R²</th></tr></thead>
+            <tbody>
+              {% for label, key in [('Entrenamiento','train'), ('Validación (cruda)','validacion_cruda'), ('Validación (calibrada)','validacion_calibrada'), ('Prueba (cruda)','test_crudo'), ('Prueba (calibrada)','test_calibrado')] %}
+              {% set row = R.get(key, {}) %}
+              <tr style="cursor:default"><td>{{ label }}</td><td>{{ n(row.get('rmse'), 3) }}</td><td>{{ n(row.get('mae'), 3) }}</td><td>{{ n(row.get('r2'), 3) }}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% set bt = R.get('backtest_temporal', {}) %}
+        {% if bt %}
+        <p style="margin-top:12px"><b>Backtest temporal</b> (entrenar con 2024–2025, evaluar en 2026): RMSE {{ n(bt.get('rmse'), 2) }} frente a {{ n(bt.get('rmse_naive'), 2) }} del baseline ingenuo;
+           MAE {{ n(bt.get('mae'), 2) }} frente a {{ n(bt.get('mae_naive'), 2) }}; R² {{ n(bt.get('r2'), 3) }}.</p>
+        {% endif %}
+        <div class="callout warn">
+          <b><i class="bi bi-exclamation-triangle-fill"></i> Cómo leerlas.</b>
+          El MAE de prueba (≈ {{ n(R.get('test_crudo', {}).get('mae'), 1) }} sobres, sobre un promedio de ≈ {{ n(M.get('target_estadisticas', {}).get('media'), 1) }} por solicitud) es un error grande para una solicitud puntual.
+          El R² de prueba es bajo ({{ n(R.get('test_crudo', {}).get('r2'), 2) }}) y hay una brecha con entrenamiento ({{ n(R.get('brecha_train_test_r2'), 2) }}):
+          el modelo capta poco de la variación individual. Por eso se usa para <b>totales por barrio</b>, no para casos individuales.
+        </div>
+        {% else %}
+        <p class="empty">No se recibieron las métricas del modelo (<code>model_meta</code>).</p>
+        {% endif %}
+      </section>
+
+      <section class="panel prose" id="alerta">
+        <h2>5 · Regla de alerta de sobredemanda</h2>
+        <p>Un barrio queda en alerta cuando la demanda proyectada <b>supera en {{ ((A.get('margen', 0.1)) * 100)|int }} %</b> al esperado
+           <b>y</b> la diferencia es de al menos <b>{{ A.get('diferencia_minima_sobres', 10)|int }} sobres</b>. El doble criterio evita falsas alarmas en barrios chicos.</p>
+        {% set base = M.get('baseline', {}) %}
+        {% if base %}
+        <p><b>Baseline:</b> {{ base.get('definicion', '') }}.
+           <code>{{ base.get('formula', '') }}</code>
+           {% if base.get('crecimiento_por_temporada') %} Crecimiento anual supuesto:
+           {% for k, v in base.crecimiento_por_temporada.items() %}{{ k }} {{ (v * 100)|round(1)|string|replace('.', ',') }} %{{ ' · ' if not loop.last }}{% endfor %}.{% endif %}</p>
+        {% endif %}
+        <p class="kpi-small">Los barrios con menos de 10 solicitudes históricas o menos de 2 años de datos se marcan como «muestra limitada».</p>
+      </section>
+
+      <section class="panel prose" id="stock">
+        <h2>6 · Módulo de control de stock</h2>
+        <p>Es un segundo sistema, independiente del mapa, que trabaja a nivel de <b>una solicitud</b>. Estima la <b>cobertura del catálogo</b> (% de variedades pedidas)
+           y genera la alerta de alta demanda (cobertura ≥ 75 %) de dos formas: <b>regresión + umbral</b> y <b>clasificador directo</b>.
+           Esquema de costos: falso positivo = 1, falso negativo = 2.</p>
+        <p class="kpi-small">Detalle de la comparación entre ambos: <code>informe/comparacion_clasificacion.csv</code> y <code>informe/comparacion_regresion.csv</code>.</p>
+      </section>
+
+      <section class="panel prose" id="limites">
+        <h2>7 · Limitaciones</h2>
+        <ul>
+          <li>La proyección <b>2027–2028</b> repite la oferta de catálogo de 2026 y un crecimiento supuesto: son <b>escenarios</b>, no pronósticos validados.</li>
+          <li>El resumen territorial suma solo los barrios mapeados con datos; los registros sin barrio no están incluidos.</li>
+          <li>2024 y 2025 (otoño–invierno) no tienen barrio en el formulario original; el baseline barrial usa solo los años con barrio.</li>
+          <li>El precio por sobre es un valor fijo supuesto, no un precio de mercado.</li>
+          <li>La alerta es una regla de decisión sobre la proyección, no una probabilidad calibrada.</li>
+          <li>El desempeño individual del modelo es limitado (ver métricas): no usar para decidir sobre una familia en particular.</li>
+        </ul>
+      </section>
+    </article>
+  </div>
+
+  {% include 'layouts/footer.html' %}
+</main>
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+</body>
+</html>
