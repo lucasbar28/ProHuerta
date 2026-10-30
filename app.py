@@ -897,16 +897,38 @@ def clean_number(value: object) -> float | int | None:
     return value
 
 
-# ── Navegación entre herramientas ────────────────────────────────────────
-# El navbar (templates/layouts/navbar.html) lee `nav_urls`. En desarrollo el control
-# de stock corre en otro puerto (app_inventario.py, 5001); en un despliegue de un
-# solo servicio se deja la ruta relativa. Se puede cambiar con INVENTARIO_URL.
+# -------------------------------------------------------------
+# Integración de Control de Stock y Análisis de Lluvias
+# -------------------------------------------------------------
+MODEL_REG_COB_PATH = MODEL_DIR / "modelo_regresion_cobertura.joblib" 
+MODEL_CLS_COB_PATH = MODEL_DIR / "modelo_clasificacion.joblib"
+
+try:
+    modelo_reg_cob = joblib.load(MODEL_REG_COB_PATH) if MODEL_REG_COB_PATH.exists() else None
+    modelo_cls_cob = joblib.load(MODEL_CLS_COB_PATH) if MODEL_CLS_COB_PATH.exists() else None
+except Exception:
+    modelo_reg_cob = None
+    modelo_cls_cob = None
+
+try:
+    from logica_lluvias import estimar_cobertura_clima
+except ImportError:
+    estimar_cobertura_clima = None
+
+OFERTA_CATALOGO_HIST = {
+    (2022, 'OI'): 7, (2023, 'OI'): 7,
+    (2024, 'PV'): 9, (2025, 'OI'): 9, (2025, 'PV'): 12,
+    (2026, 'OI'): 17, (2026, 'PV'): 18,
+    (2027, 'OI'): 19, (2027, 'PV'): 20
+}
+
 NAV_URLS = {
     "portada": "/",
     "home": "/inicio",
     "mapa": "/mapa",
     "informe": "/informe",
-    "inventario": os.environ.get("INVENTARIO_URL", "http://127.0.0.1:5001/"),
+    "inventario": "/inventario",
+    "lluvias": "/lluvias",
 }
 
 
@@ -941,6 +963,80 @@ def mapa_demanda():
 def informe():
     """Informe de datos y documentación técnica de los modelos."""
     return render_template("informe.html", model_meta=METADATA)
+
+
+@app.route("/inventario", methods=["GET", "POST"])
+def inventario():
+    """Simulador de cobertura y control de stock."""
+    contexto = {
+        "prediccion_num": None,
+        "alerta_regresion": None,
+        "alerta_clasificador": None,
+        "coinciden": None,
+        "oferta_temporada": None,
+    }
+    
+    if request.method == "POST":
+        try:
+            anio = int(request.form.get("anio", 2027))
+            temporada = request.form.get("temporada", "PV").upper()
+            
+            contexto["oferta_temporada"] = OFERTA_CATALOGO_HIST.get((anio, temporada), 10)
+            
+            input_data = pd.DataFrame([{
+                "Año": anio,
+                "Temporada": temporada,
+                "Tipo_Localizacion": request.form.get("tipo_localizacion", "urbana"),
+                "Tipo_Huerta": request.form.get("tipo_huerta", "familiar"),
+                "Experiencia_Huerta_Clean": request.form.get("experiencia", "primera vez"),
+                "Superficie_Clean": request.form.get("superficie", "hasta 5 m2"),
+                "Destino_Clean": request.form.get("destino", "autoconsumo"),
+                "Ocupacion_Clean": request.form.get("ocupacion", "empleado/a"),
+                "Oferta_Catalogo": contexto["oferta_temporada"]
+            }])
+            
+            if modelo_reg_cob is not None:
+                pred_cobertura = float(modelo_reg_cob.predict(input_data)[0])
+                pred_cobertura = max(0.0, min(100.0, pred_cobertura))
+                contexto["prediccion_num"] = round(pred_cobertura, 1)
+                contexto["alerta_regresion"] = 1 if pred_cobertura >= 75.0 else 0
+            
+            if modelo_cls_cob is not None:
+                contexto["alerta_clasificador"] = int(modelo_cls_cob.predict(input_data)[0])
+            
+            if contexto["alerta_regresion"] is not None and contexto["alerta_clasificador"] is not None:
+                contexto["coinciden"] = (contexto["alerta_regresion"] == contexto["alerta_clasificador"])
+                
+        except Exception:
+            pass
+            
+    return render_template("inventario.html", **contexto)
+
+
+@app.route("/lluvias", methods=["GET", "POST"])
+def analisis_climatico():
+    """Simulador del impacto de las precipitaciones sobre la cobertura."""
+    contexto = {
+        "impacto_clima": None,
+        "oferta_temporada": None
+    }
+    
+    if request.method == "POST":
+        try:
+            anio = int(request.form.get("anio", 2027))
+            temporada = request.form.get("temporada", "PV").upper()
+            precipitaciones = float(request.form.get("precipitaciones", 650.0))
+            
+            contexto["oferta_temporada"] = OFERTA_CATALOGO_HIST.get((anio, temporada), 15)
+            
+            if estimar_cobertura_clima is not None:
+                # LLAMADA CORREGIDA: Se pasa únicamente la variable climática (sin data leakage de la oferta)
+                impacto = estimar_cobertura_clima(precipitaciones)
+                contexto["impacto_clima"] = round(impacto, 1)
+        except Exception:
+            pass
+            
+    return render_template("lluvias.html", **contexto)
 
 
 @app.route("/api/filtros")

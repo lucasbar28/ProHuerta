@@ -1,0 +1,135 @@
+{#- Vista: Análisis Climático (Precipitaciones).
+   Ruta Flask: /lluvias. Se envía por POST a la misma URL.
+   Contexto esperado (lo entrega app.py): impacto_clima, oferta_temporada (None antes de calcular). -#}
+{% set page_title = 'Análisis Climático' %}
+{% set active_page = 'lluvias' %}
+{% include 'layouts/head.html' %}
+{% set F = request.form if request.method == 'POST' else {} %}
+{% macro opt(name, value, label, default=False) -%}
+  <option value="{{ value }}" {{ 'selected' if (F.get(name) == value or (not F.get(name) and default)) else '' }}>{{ label }}</option>
+{%- endmacro %}
+<body class="page-lluvias">
+{% include 'layouts/navbar.html' %}
+
+<main class="page">
+  <div class="grid-2">
+
+    <aside>
+      <form class="panel" method="POST" action="" id="form-clima" novalidate>
+        <h3 class="panel-title"><i class="bi bi-cloud-rain"></i> Escenario Climático</h3>
+
+        <div>
+          <div class="field">
+            <label for="temporada">Temporada</label>
+            <select class="select" name="temporada" id="temporada" required>
+              {{ opt('temporada', 'PV', 'Primavera–Verano (PV)', True) }}
+              {{ opt('temporada', 'OI', 'Otoño–Invierno (OI)') }}
+            </select>
+          </div>
+          <div class="field">
+            <label for="anio">Año</label>
+            <select class="select" name="anio" id="anio" required data-selected="{{ F.get('anio', '2027') }}"></select>
+          </div>
+        </div>
+        
+        <div class="field">
+          <label for="precipitaciones">Precipitaciones esperadas (mm)</label>
+          <input type="number" class="select" name="precipitaciones" id="precipitaciones" 
+                 value="{{ F.get('precipitaciones', '650') }}" min="0" max="2000" required>
+        </div>
+        <div class="kpi-small" style="margin:-6px 0 12px">Promedio histórico: 650 mm (PV) y 380 mm (OI).</div>
+
+        <button class="ph-btn blue" type="submit"><i class="bi bi-cloud-lightning-rain-fill"></i> Simular impacto de lluvias</button>
+      </form>
+    </aside>
+
+    <section class="stack" aria-live="polite">
+      <div class="panel">
+        <h3 class="panel-title"><i class="bi bi-graph-up-arrow"></i> Impacto en Cobertura</h3>
+
+        {% if impacto_clima is defined and impacto_clima is not none %}
+          {% set oferta = oferta_temporada | default(none) %}
+          
+          {# Lógica del Semáforo de Impacto #}
+          {% set color_barra = '#ff4d4f' %} {# Rojo: Bajo impacto / Sequía #}
+          {% if impacto_clima >= 75 %}
+            {% set color_barra = '#3ddc84' %} {# Verde: Alta cobertura / Excelente #}
+          {% elif impacto_clima >= 45 %}
+            {% set color_barra = '#2f8cff' %} {# Azul: Comportamiento estándar #}
+          {% endif %}
+
+          <div class="kpi-label">Cobertura estimada puramente por variables climáticas</div>
+          <div class="kpi-row">
+            <span class="result-big" style="color: {{ color_barra }}">{{ impacto_clima | string | replace('.', ',') }}%</span>
+            {% if oferta %}
+              <span class="kpi-small">≈ {{ (impacto_clima * oferta / 100) | round | int }} de {{ oferta }} variedades de la temporada</span>
+            {% endif %}
+          </div>
+          
+          <div class="progress" style="height:10px;background:rgba(255,255,255,.08);margin:10px 0 18px" role="progressbar"
+               aria-valuenow="{{ impacto_clima }}" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-bar" style="width:{{ impacto_clima }}%;background:linear-gradient(90deg, #00bcd4, {{ color_barra }})"></div>
+          </div>
+
+          {# Lógica de Contexto Histórico #}
+          {% set mm_ingresados = F.get('precipitaciones') | int %}
+          {% set temporada_sel = F.get('temporada') %}
+          {% set umbral_seco = 500 if temporada_sel == 'PV' else 250 %}
+          {% set umbral_lluvioso = 800 if temporada_sel == 'PV' else 500 %}
+          
+          <div class="callout info" style="margin-top:14px">
+            <b><i class="bi bi-info-circle-fill"></i> Contexto: 
+            {% if mm_ingresados < umbral_seco %}
+              Escenario de sequía.
+            {% elif mm_ingresados > umbral_lluvioso %}
+              Temporada de precipitaciones intensas.
+            {% else %}
+              Régimen de lluvias promedio.
+            {% endif %}
+            </b><br>
+            El modelo purgado proyecta la rotación de sobres frente a un nivel de precipitaciones de <b>{{ mm_ingresados }} mm</b>, independientemente del volumen del catálogo.
+          </div>
+        {% else %}
+          <div class="empty">
+            <i class="bi bi-cloud-drizzle" style="font-size:2rem;display:block;margin-bottom:8px"></i>
+            Ingresá los milímetros de lluvia esperados y presioná <b>«Simular impacto de lluvias»</b> para ver el contexto hídrico.
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="panel prose">
+        <h2 style="font-size:1.05rem">¿Qué analiza este modelo?</h2>
+        <ul>
+          <li><b>Aislamiento Climático (Nuevo):</b> A diferencia del estimador de demanda general, este modelo penaliza o beneficia la rotación de sobres evaluando <strong>exclusivamente</strong> los milímetros de lluvia (<code>Precipitaciones_Hist_mm</code>), sin sesgarse por el tamaño del catálogo de ese año.</li>
+          <li><b>Comportamiento estacional:</b> Las temporadas de lluvia intensa suelen promover mayor entusiasmo y superficie sembrada, modificando la cobertura real requerida.</li>
+          <li><b>Uso operativo:</b> Sirve a los coordinadores de ProHuerta como herramienta de estrés rápido: permite anticipar si un pronóstico del Niño (lluvioso) o Niña (seco) obligará a ajustar el stock base antes de lanzar la temporada.</li>
+        </ul>
+      </div>
+    </section>
+  </div>
+
+  {% include 'layouts/footer.html' %}
+</main>
+
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script>
+  (function () {
+    var VALID = { PV: [2024, 2025, 2026, 2027], OI: [2025, 2026, 2027] };
+    var t = document.getElementById('temporada'), a = document.getElementById('anio'), p = document.getElementById('precipitaciones');
+    function fill() {
+      var keep = parseInt(a.value || a.getAttribute('data-selected'), 10), ys = VALID[t.value] || [];
+      a.innerHTML = ys.map(function (y) { return '<option value="' + y + '">' + y + '</option>'; }).join('');
+      a.value = ys.indexOf(keep) >= 0 ? keep : ys[ys.length - 1];
+      
+      // Auto-sugerir mm promedio si no se ha enviado el form
+      if (!p.dataset.modified) {
+          p.value = t.value === 'PV' ? '650' : '380';
+      }
+    }
+    t.addEventListener('change', fill);
+    p.addEventListener('input', function() { p.dataset.modified = "true"; });
+    fill();
+  })();
+</script>
+</body>
+</html> 
