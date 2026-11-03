@@ -1030,3 +1030,34 @@ html {
         scroll-behavior: auto;
     }
 }
+
+/* --- Corrección del salto del carrusel --- */
+.showcase-slide {
+    height: 480px !important; /* Fija la altura exacta en PC para todas las tarjetas */
+}
+
+.showcase-art {
+    height: 100%; /* Obliga a la foto a cubrir toda esa altura de forma pareja */
+}
+
+/* En celulares, la foto pasa abajo del texto. Dejamos que la altura sea flexible para que no se corte el texto */
+@media (max-width: 767.98px) {
+    .showcase-slide {
+        height: auto !important;
+        min-height: 680px; 
+    }
+    .showcase-art {
+        height: 300px;
+    }
+}
+
+/* --- Corrección de los botones superpuestos --- */
+#projectCarousel {
+    padding-bottom: 60px !important; /* Abre espacio abajo de la tarjeta para los botones */
+}
+
+#projectCarousel .carousel-indicators,
+#projectCarousel .carousel-control-prev,
+#projectCarousel .carousel-control-next {
+    z-index: 15 !important; /* Obliga a los botones a estar siempre por encima de las imágenes */
+}
