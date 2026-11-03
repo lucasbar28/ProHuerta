@@ -115,6 +115,9 @@
               <div class="kpi-label">Clasificador directo</div>
               {% if alerta_clasificador == 1 %}<span class="chip red"><i class="bi bi-exclamation-triangle-fill"></i> 1 · Alta demanda</span>
               {% else %}<span class="chip gray">0 · Demanda estándar</span>{% endif %}
+              {% if probabilidad_clasificador is not none %}
+              <div class="kpi-small">Probabilidad: {{ probabilidad_clasificador|string|replace('.', ',') }}% · umbral 37%</div>
+              {% endif %}
             </div>
           </div>
 
