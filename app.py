@@ -11,6 +11,11 @@ import numpy as np
 import pandas as pd
 from flask import Flask, jsonify, render_template, request
 
+from logica_clasificacion import (
+    UMBRAL_ALTA_DEMANDA,
+    preparar_entrada_clasificador,
+    predecir_alerta_alta_demanda,
+)
 from logica_demanda import (
     MUESTRA_MINIMA_ANIOS,
     MUESTRA_MINIMA_SOLICITUDES,
@@ -45,6 +50,9 @@ DIFERENCIA_MINIMA_SOBRES = float(
 )
 CRECIMIENTO_POR_TEMPORADA = METADATA["baseline"]["crecimiento_por_temporada"]
 CALIBRACION_POR_TEMPORADA = METADATA["regresion"]["calibracion_por_temporada"]
+UMBRAL_CLASIFICACION = float(
+    METADATA.get("clasificacion", {}).get("umbral_decision", UMBRAL_ALTA_DEMANDA)
+)
 SHRINKAGE_K = 10.0
 
 SOLICITUDES = pd.read_csv(DATA_DIR / "solicitudes_v2.csv")
@@ -901,7 +909,7 @@ def clean_number(value: object) -> float | int | None:
 # Integración de Control de Stock y Análisis de Lluvias
 # -------------------------------------------------------------
 MODEL_REG_COB_PATH = MODEL_DIR / "modelo_regresion_cobertura.joblib" 
-MODEL_CLS_COB_PATH = MODEL_DIR / "modelo_clasificacion.joblib"
+MODEL_CLS_COB_PATH = MODEL_DIR / "modelo_clasificacion_dash.joblib"
 
 try:
     modelo_reg_cob = joblib.load(MODEL_REG_COB_PATH) if MODEL_REG_COB_PATH.exists() else None
@@ -972,6 +980,7 @@ def inventario():
         "prediccion_num": None,
         "alerta_regresion": None,
         "alerta_clasificador": None,
+        "probabilidad_clasificador": None,
         "coinciden": None,
         "oferta_temporada": None,
     }
@@ -1002,7 +1011,25 @@ def inventario():
                 contexto["alerta_regresion"] = 1 if pred_cobertura >= 75.0 else 0
             
             if modelo_cls_cob is not None:
-                contexto["alerta_clasificador"] = int(modelo_cls_cob.predict(input_data)[0])
+                entrada_cls = preparar_entrada_clasificador(
+                    temporada=temporada,
+                    oferta_catalogo=contexto["oferta_temporada"],
+                    tipo_huerta=request.form.get("tipo_huerta", "familiar"),
+                    tipo_localizacion=request.form.get("tipo_localizacion", "urbana"),
+                    experiencia=request.form.get("experiencia", "primera vez"),
+                    superficie=request.form.get("superficie", "hasta 5 m2"),
+                    destino=request.form.get("destino", "autoconsumo"),
+                    ocupacion=request.form.get("ocupacion", "empleado/a"),
+                )
+                alerta, probabilidad = predecir_alerta_alta_demanda(
+                    modelo_cls_cob, entrada_cls, UMBRAL_CLASIFICACION
+                )
+                contexto["alerta_clasificador"] = alerta
+                contexto["probabilidad_clasificador"] = (
+                    round(probabilidad * 100, 1)
+                    if probabilidad is not None
+                    else None
+                )
             
             if contexto["alerta_regresion"] is not None and contexto["alerta_clasificador"] is not None:
                 contexto["coinciden"] = (contexto["alerta_regresion"] == contexto["alerta_clasificador"])

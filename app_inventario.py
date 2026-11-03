@@ -5,12 +5,18 @@ import joblib
 import pandas as pd
 from flask import Flask, render_template, request, jsonify
 
+from logica_clasificacion import (
+    UMBRAL_ALTA_DEMANDA,
+    preparar_entrada_clasificador,
+    predecir_alerta_alta_demanda,
+)
+
 BASE_DIR = Path(__file__).resolve().parent
 MODEL_DIR = BASE_DIR / "modelos"
 
 # Cargamos los modelos originales (asegúrate de que los nombres de los archivos correspondan)
 MODEL_REG_PATH = MODEL_DIR / "modelo_regresion_cobertura.joblib" 
-MODEL_CLS_PATH = MODEL_DIR / "modelo_clasificacion.joblib"
+MODEL_CLS_PATH = MODEL_DIR / "modelo_clasificacion_dash.joblib"
 
 modelo_regresion = joblib.load(MODEL_REG_PATH)
 modelo_clasificacion = joblib.load(MODEL_CLS_PATH)
@@ -47,6 +53,7 @@ def index():
         "prediccion_num": None,
         "alerta_regresion": None,
         "alerta_clasificador": None,
+        "probabilidad_clasificador": None,
         "coinciden": None,
         "oferta_temporada": None
     }
@@ -79,7 +86,23 @@ def index():
             contexto["alerta_regresion"] = 1 if pred_cobertura >= 75.0 else 0
             
             # 3. Alerta por Clasificador Directo
-            contexto["alerta_clasificador"] = int(modelo_clasificacion.predict(input_data)[0])
+            entrada_cls = preparar_entrada_clasificador(
+                temporada=temporada,
+                oferta_catalogo=contexto["oferta_temporada"],
+                tipo_huerta=request.form.get("tipo_huerta", "familiar"),
+                tipo_localizacion=request.form.get("tipo_localizacion", "urbana"),
+                experiencia=request.form.get("experiencia", "primera vez"),
+                superficie=request.form.get("superficie", "hasta 5 m2"),
+                destino=request.form.get("destino", "autoconsumo"),
+                ocupacion=request.form.get("ocupacion", "empleado/a"),
+            )
+            alerta, probabilidad = predecir_alerta_alta_demanda(
+                modelo_clasificacion, entrada_cls, UMBRAL_ALTA_DEMANDA
+            )
+            contexto["alerta_clasificador"] = alerta
+            contexto["probabilidad_clasificador"] = (
+                round(probabilidad * 100, 1) if probabilidad is not None else None
+            )
             
             # 4. Verificar coincidencia
             contexto["coinciden"] = (contexto["alerta_regresion"] == contexto["alerta_clasificador"])
