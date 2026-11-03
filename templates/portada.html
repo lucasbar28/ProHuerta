@@ -27,12 +27,11 @@
     <header class="navbar navbar-expand-lg navbar-dark navbar-prohuerta sticky-top">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center gap-2" href="#inicio" aria-label="ProHuerta Chascomús, inicio">
-                <span class="brand-icon">
-                    <i class="bi bi-flower1"></i>
-                </span>
+                <!-- NUEVO LOGO INSTITUCIONAL -->
+                <img src="{{ url_for('static', filename='img/logochascomus.jpg') }}" alt="Logo ProHuerta Chascomús" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.2);">
                 <span>
-                    <strong>ProHuerta Chascomús</strong>
-                    <small class="d-block brand-subtitle">Ciencia de Datos e Inteligencia Artificial</small>
+                    <strong>"Cosechando Saberes / Machine Learning"</strong>
+                    <small class="d-block brand-subtitle">     Tec. Ciencia de Datos e IA</small>
                 </span>
             </a>
 
@@ -138,6 +137,7 @@
                     </div>
 
                     <div class="carousel-inner">
+                        <!-- SLIDE 1: COMUNIDAD -->
                         <div class="carousel-item active">
                             <div class="showcase-slide slide-community">
                                 <div class="showcase-copy">
@@ -165,19 +165,17 @@
                                     </div>
                                 </div>
 
-                                <div class="showcase-art art-community">
-                                    <div class="art-circle circle-one"></div>
-                                    <div class="art-circle circle-two"></div>
-                                    <i class="bi bi-flower2 art-main-icon"></i>
-                                    <i class="bi bi-flower1 art-small-icon"></i>
-                                    <div class="art-caption">
-                                        <i class="bi bi-geo-alt-fill"></i>
-                                        <span>Raíces locales, futuro compartido</span>
+                                <!-- FOTO 1 -->
+                                <div class="showcase-art" style="background-image: url('/static/img/fotocarrusel1.jpg'); background-size: cover; background-position: center; border-left: none;">
+                                   <div class="art-caption">
+                                     <i class="bi bi-geo-alt-fill"></i>
+                                     <span>Raíces locales, futuro compartido</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- SLIDE 2: INVESTIGACIÓN -->
                         <div class="carousel-item">
                             <div class="showcase-slide slide-research">
                                 <div class="showcase-copy">
@@ -203,32 +201,17 @@
                                     </div>
                                 </div>
 
-                                <div class="showcase-art art-research">
-                                    <div class="floating-data data-top">
-                                        <i class="bi bi-calendar3"></i>
-                                        <span>Años y temporadas</span>
-                                    </div>
-
-                                    <div class="chart-illustration">
-                                        <div class="chart-grid"></div>
-                                        <div class="chart-bars">
-                                            <span style="--bar-height: 34%"></span>
-                                            <span style="--bar-height: 52%"></span>
-                                            <span style="--bar-height: 43%"></span>
-                                            <span style="--bar-height: 72%"></span>
-                                            <span style="--bar-height: 88%"></span>
-                                        </div>
-                                        <i class="bi bi-graph-up-arrow chart-arrow"></i>
-                                    </div>
-
-                                    <div class="floating-data data-bottom">
-                                        <i class="bi bi-geo-alt"></i>
-                                        <span>Patrones territoriales</span>
+                                <!-- FOTO 2 -->
+                                <div class="showcase-art" style="background-image: url('/static/img/fotocarrusel2.jpg'); background-size: cover; background-position: center; border-left: none;">
+                                   <div class="art-caption">
+                                       <i class="bi bi-search"></i>
+                                      <span>Explorando patrones en el territorio</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
+                        <!-- SLIDE 3: DESARROLLO -->
                         <div class="carousel-item">
                             <div class="showcase-slide slide-tools">
                                 <div class="showcase-copy">
@@ -255,38 +238,17 @@
                                     </div>
                                 </div>
 
-                                <div class="showcase-art art-tools">
-                                    <div class="tool-window">
-                                        <div class="tool-window-header">
-                                            <span></span><span></span><span></span>
-                                            <small>Exploración de datos</small>
-                                        </div>
-
-                                        <div class="tool-window-body">
-                                            <div class="tool-stat">
-                                                <i class="bi bi-bar-chart-line"></i>
-                                                <span>Indicadores</span>
-                                            </div>
-
-                                            <div class="tool-map">
-                                                <i class="bi bi-geo-alt-fill map-pin pin-one"></i>
-                                                <i class="bi bi-geo-alt-fill map-pin pin-two"></i>
-                                                <i class="bi bi-geo-alt-fill map-pin pin-three"></i>
-                                                <i class="bi bi-geo-alt-fill map-pin pin-four"></i>
-                                                <div class="map-road road-one"></div>
-                                                <div class="map-road road-two"></div>
-                                            </div>
-
-                                            <div class="tool-footer">
-                                                <i class="bi bi-lightbulb"></i>
-                                                Información para explorar
-                                            </div>
-                                        </div>
+                                <!-- FOTO 3 -->
+                               <div class="showcase-art" style="background-image: url('/static/img/fotocarrusel3.jpg'); background-size: cover; background-position: center; border-left: none;">
+                                  <div class="art-caption">
+                                      <i class="bi bi-laptop"></i>
+                                      <span>Herramientas visuales y proyecciones</span>
                                     </div>
-                                </div>
+                                 </div>
                             </div>
                         </div>
 
+                        <!-- SLIDE 4: COMPROMISO -->
                         <div class="carousel-item">
                             <div class="showcase-slide slide-future">
                                 <div class="showcase-copy">
@@ -315,19 +277,13 @@
                                     </div>
                                 </div>
 
-                                <div class="showcase-art art-future">
-                                    <div class="future-sun"></div>
-                                    <i class="bi bi-tree-fill future-tree"></i>
-                                    <i class="bi bi-flower1 future-flower flower-left"></i>
-                                    <i class="bi bi-flower2 future-flower flower-right"></i>
-                                    <div class="future-ground"></div>
-
-                                    <div class="future-message">
-                                        <i class="bi bi-heart-fill"></i>
-                                        <span>Conocimiento que hace crecer la comunidad</span>
+                                <!-- FOTO 4 -->
+                                <div class="showcase-art" style="background-image: url('/static/img/fotocarrusel4.jpg'); background-size: cover; background-position: center; border-left: none;">
+                                  <div class="art-caption">
+                                   <i class="bi bi-heart-fill" style="color: var(--red);"></i>
+                                   <span>Conocimiento que hace crecer la comunidad</span>
                                     </div>
                                 </div>
-                            </div>
                         </div>
                     </div>
 
